@@ -70,6 +70,11 @@ Resume PDF/DOCX
   -> ValidationReport(...)
   -> CandidateProfileGenerator.generate()
   -> CandidateProfile(...)
+  -> JobSearchQueryGenerator.generate()
+  -> JobSearchQuerySet(...)
+  -> JobSearchService.search_all()
+  -> JobSearchResultSet(...)
+  -> standardized JobPosting objects
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -80,3 +85,13 @@ discovery, ranking, ATS scoring, skill-gap analysis, and optimization modules.
 The current generator is deterministic and rules-based. It may classify
 existing evidence into domains and likely target roles, but it never invents
 skills, credentials, projects, technologies, education, or work history.
+
+The job search query generator creates prioritized, role-oriented searches from
+the candidate profile and optional location, remote, employment-type, and role
+preferences. It performs no web searches. Future job-source integrations will
+consume the structured `JobSearchQuery` objects.
+
+The job source layer defines a provider-neutral `JobSource` interface. Future
+Greenhouse, Lever, and company career-page integrations will normalize their
+provider responses into the same `JobPosting` model. The included
+`MockJobSource` is development-only and performs no network calls.

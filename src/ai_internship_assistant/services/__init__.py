@@ -13,6 +13,16 @@ from ai_internship_assistant.services.document_extraction import (
     UnsupportedDocumentFormatError,
     extract_text,
 )
+from ai_internship_assistant.services.job_search_query_generator import (
+    JobSearchQueryGenerationError,
+    JobSearchQueryGenerator,
+)
+from ai_internship_assistant.services.job_sources import (
+    JobSearchService,
+    JobSource,
+    JobSourceSearchError,
+    MockJobSource,
+)
 from ai_internship_assistant.services.resume_parser import (
     EmptyResumeTextError,
     LLMResumeParsingError,
@@ -35,7 +45,13 @@ __all__ = [
     "DocumentExtractionError",
     "EmptyResumeTextError",
     "LLMResumeParsingError",
+    "JobSearchQueryGenerationError",
+    "JobSearchQueryGenerator",
+    "JobSearchService",
+    "JobSource",
+    "JobSourceSearchError",
     "MalformedLLMResponseError",
+    "MockJobSource",
     "OpenAIResumeParser",
     "ProfileGenerator",
     "ResumeParser",

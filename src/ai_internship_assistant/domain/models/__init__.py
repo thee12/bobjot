@@ -18,7 +18,25 @@ from ai_internship_assistant.domain.models.candidate_profile import (
     ProfileValidationStatus,
 )
 from ai_internship_assistant.domain.models.common import FileFormat, SourceFile
-from ai_internship_assistant.domain.models.job import EmploymentType, JobPosting, JobSeniority
+from ai_internship_assistant.domain.models.job import (
+    EmploymentType,
+    JobPosting,
+    JobSearchErrorType,
+    JobSearchResultSet,
+    JobSeniority,
+    JobSourceError,
+    JobSourceSearchResult,
+    JobSourceType,
+    WorkArrangement,
+)
+from ai_internship_assistant.domain.models.job_search import (
+    JobSearchPreferences,
+    JobSearchQuery,
+    JobSearchQuerySet,
+    QueryPriority,
+    RemotePreference,
+    SearchEmploymentType,
+)
 from ai_internship_assistant.domain.models.preferences import UserPreferences
 from ai_internship_assistant.domain.models.resume import (
     Certification,
@@ -52,12 +70,23 @@ __all__ = [
     "GeneratedResumeVersion",
     "JobDescriptionAnalysis",
     "JobPosting",
+    "JobSearchErrorType",
+    "JobSearchResultSet",
+    "JobSearchPreferences",
+    "JobSearchQuery",
+    "JobSearchQuerySet",
     "JobSeniority",
+    "JobSourceError",
+    "JobSourceSearchResult",
+    "JobSourceType",
     "Project",
     "ProfileGenerationResult",
     "ProfileValidationStatus",
     "Resume",
     "ResumeSkill",
+    "QueryPriority",
+    "RemotePreference",
+    "SearchEmploymentType",
     "Skill",
     "SourceFile",
     "UserPreferences",
@@ -65,4 +94,5 @@ __all__ = [
     "ValidationIssue",
     "ValidationReport",
     "ValidationSeverity",
+    "WorkArrangement",
 ]
