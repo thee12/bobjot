@@ -67,8 +67,16 @@ Resume PDF/DOCX
   -> OpenAIResumeParser.parse()
   -> Resume(...)
   -> ResumeValidator.validate()
-  -> structured resume plus non-blocking validation warnings
+  -> ValidationReport(...)
+  -> CandidateProfileGenerator.generate()
+  -> CandidateProfile(...)
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
 tailor resumes.
+
+The candidate profile is the normalized downstream contract for future job
+discovery, ranking, ATS scoring, skill-gap analysis, and optimization modules.
+The current generator is deterministic and rules-based. It may classify
+existing evidence into domains and likely target roles, but it never invents
+skills, credentials, projects, technologies, education, or work history.

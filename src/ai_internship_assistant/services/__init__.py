@@ -1,5 +1,11 @@
 """Service-layer entrypoints for application workflows."""
 
+from ai_internship_assistant.services.candidate_profile_generator import (
+    CandidateProfileGenerationError,
+    CandidateProfileGenerator,
+    CandidateProfilePipeline,
+    ProfileGenerator,
+)
 from ai_internship_assistant.services.document_extraction import (
     CorruptedDocumentError,
     DocumentExtractionError,
@@ -23,11 +29,15 @@ from ai_internship_assistant.services.resume_validation import (
 __all__ = [
     "DocumentTextExtractor",
     "CorruptedDocumentError",
+    "CandidateProfileGenerationError",
+    "CandidateProfileGenerator",
+    "CandidateProfilePipeline",
     "DocumentExtractionError",
     "EmptyResumeTextError",
     "LLMResumeParsingError",
     "MalformedLLMResponseError",
     "OpenAIResumeParser",
+    "ProfileGenerator",
     "ResumeParser",
     "ResumeParsingError",
     "ResumeValidationError",

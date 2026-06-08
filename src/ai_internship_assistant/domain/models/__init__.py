@@ -10,6 +10,13 @@ from ai_internship_assistant.domain.models.application import (
     ApplicationStatus,
     GeneratedResumeVersion,
 )
+from ai_internship_assistant.domain.models.candidate_profile import (
+    CandidateDomain,
+    CandidateProfile,
+    ExperienceLevel,
+    ProfileGenerationResult,
+    ProfileValidationStatus,
+)
 from ai_internship_assistant.domain.models.common import FileFormat, SourceFile
 from ai_internship_assistant.domain.models.job import EmploymentType, JobPosting, JobSeniority
 from ai_internship_assistant.domain.models.preferences import UserPreferences
@@ -35,8 +42,11 @@ __all__ = [
     "AtsKeywordSet",
     "AtsScore",
     "Certification",
+    "CandidateDomain",
+    "CandidateProfile",
     "Education",
     "EmploymentType",
+    "ExperienceLevel",
     "Experience",
     "FileFormat",
     "GeneratedResumeVersion",
@@ -44,6 +54,8 @@ __all__ = [
     "JobPosting",
     "JobSeniority",
     "Project",
+    "ProfileGenerationResult",
+    "ProfileValidationStatus",
     "Resume",
     "ResumeSkill",
     "Skill",

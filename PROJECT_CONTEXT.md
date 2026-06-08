@@ -13,6 +13,19 @@ The project uses a modular `src` layout with clear boundaries:
 - Storage modules will isolate database concerns from business workflows.
 - Configuration is centralized and typed.
 
+## Candidate Profile Architecture
+
+`CandidateProfile` is the normalized representation intended for most future
+downstream modules. The rules-based `CandidateProfileGenerator` consumes a
+`Resume` and `ValidationReport`, organizes existing skills, classifies domains
+and experience level from explicit evidence, recommends evidence-supported
+target role categories, and produces a confidence score.
+
+The generator may classify evidence but must never add factual claims. Its
+current limitations are intentional: domain and role maps are deterministic,
+finite, and designed to be replaced or extended behind the `ProfileGenerator`
+boundary without changing downstream consumers.
+
 ## Phase 1 Scope
 
 This scaffold includes:
@@ -37,4 +50,3 @@ This scaffold intentionally excludes:
 ## AI Safety Constraint
 
 The system must preserve truthfulness. Any future optimization component must be constrained to facts present in the user's source resume or explicitly supplied by the user. It may improve presentation but must not create new factual claims.
-
