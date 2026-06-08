@@ -6,7 +6,7 @@ new experience, dates, credentials, tools, employers, projects, or metrics.
 """
 
 import re
-from typing import Annotated, TypeAlias
+from typing import Annotated
 
 from pydantic import (
     BaseModel,
@@ -19,8 +19,8 @@ from pydantic import (
 
 from ai_internship_assistant.domain.models.common import SourceFile
 
-NonEmptyStr: TypeAlias = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
-OptionalCleanStr: TypeAlias = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+type NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+type OptionalCleanStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 _EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
