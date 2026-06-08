@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, SkipValidation, model_validator
 
 from ai_internship_assistant.domain.models.job_search import (
     JobSearchQuery,
@@ -182,6 +182,66 @@ class JobPosting(BaseModel):
         return re.sub(r"[^a-z0-9]+", " ", cleaned).strip()
 
 
+class NormalizedJobPosting(BaseModel):
+    """Non-mutating normalized representation used for deduplication."""
+
+    model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+
+    original_job: SkipValidation[JobPosting]
+    normalized_title: str
+    normalized_company: str
+    normalized_location: str
+    normalized_employment_type: EmploymentType
+    normalized_work_arrangement: WorkArrangement
+    normalized_apply_url: str | None = None
+    normalized_source_url: str | None = None
+    normalized_description_text: str
+    fingerprint: str
+    similarity_keys: list[str] = Field(default_factory=list)
+
+
+class JobDeduplicationGroup(BaseModel):
+    """Traceable group containing a selected canonical job and duplicates."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    canonical_job: SkipValidation[JobPosting]
+    duplicate_jobs: list[SkipValidation[JobPosting]] = Field(default_factory=list)
+    duplicate_count: int = 0
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    reason: str
+
+    @model_validator(mode="after")
+    def populate_duplicate_count(self) -> "JobDeduplicationGroup":
+        """Populate duplicate count from preserved original jobs."""
+
+        object.__setattr__(self, "duplicate_count", len(self.duplicate_jobs))
+        return self
+
+
+class JobDeduplicationResult(BaseModel):
+    """Result of conservative job deduplication."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    unique_jobs: list[SkipValidation[JobPosting]] = Field(default_factory=list)
+    duplicate_groups: list[JobDeduplicationGroup] = Field(default_factory=list)
+    original_count: int = 0
+    unique_count: int = 0
+    duplicate_count: int = 0
+    warnings: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def populate_counts(self) -> "JobDeduplicationResult":
+        """Populate counts from the deduplication output."""
+
+        unique_count = len(self.unique_jobs)
+        duplicate_count = sum(group.duplicate_count for group in self.duplicate_groups)
+        object.__setattr__(self, "unique_count", unique_count)
+        object.__setattr__(self, "duplicate_count", duplicate_count)
+        return self
+
+
 class JobSourceError(BaseModel):
     """Structured error from one job source and query."""
 
@@ -222,6 +282,8 @@ class JobSearchResultSet(BaseModel):
     query_set: JobSearchQuerySet
     source_results: list[JobSourceSearchResult] = Field(default_factory=list)
     jobs: list[JobPosting] = Field(default_factory=list)
+    normalized_jobs: list[NormalizedJobPosting] = Field(default_factory=list)
+    deduplication_result: JobDeduplicationResult | None = None
     errors: list[JobSourceError] = Field(default_factory=list)
     total_found: int = Field(default=0, ge=0)
     searched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

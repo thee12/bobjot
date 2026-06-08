@@ -134,3 +134,55 @@ their provider-specific fields into `JobPosting`. Lever list sections are
 classified into responsibilities, requirements, and preferred qualifications
 when headings make that classification clear. Unit tests use mocked HTTP
 responses only.
+
+### Job Normalization And Deduplication
+
+`JobNormalizationService` creates non-mutating normalized views of provider
+postings. It standardizes common title variants, a small expandable company
+alias set, locations, remote labels, tracking parameters, and description
+formatting. Stable fingerprints use normalized company, title, and location.
+
+`JobDeduplicationService` merges only high-confidence duplicates:
+
+- identical normalized apply URL: `1.0`
+- identical normalized source URL: `0.95`
+- same normalized company, highly similar title, and same location: `0.85`
+
+Possible duplicates below the automatic merge threshold remain separate and
+produce warnings. Canonical selection prefers the posting with the most
+complete description, followed by apply URL availability, direct ATS source,
+posted date, and structured fields. Duplicate groups retain every original job
+for traceability.
+
+`JobSearchService(..., normalize=True, deduplicate=True)` enables the clean-job
+pipeline. Both options default to `False` to preserve existing raw-result
+behavior.
+
+### Job Fit Ranking
+
+`JobFitScoringService` deterministically scores clean jobs against a
+`CandidateProfile`. It produces separate component scores, matched and missing
+skills, matched certifications and keywords, disqualifying flags, warnings,
+and a human-readable explanation.
+
+Default component weights are centralized in `JobFitScoringConfig`:
+
+- role match: 25%
+- skill match: 25%
+- domain match: 15%
+- experience level: 15%
+- employment type: 10%
+- certification match: 5%
+- location match: 3%
+- keyword match: 2%
+
+Recommendation levels are `STRONG_MATCH` (90+), `GOOD_MATCH` (75+),
+`POSSIBLE_MATCH` (60+), `WEAK_MATCH` (40+), and `NOT_RECOMMENDED` (below 40).
+Flags such as senior-level role, clearance, advanced degree, years-of-
+experience, unrelated domain, and location mismatch reduce scores but do not
+automatically remove jobs.
+
+Scoring is rule-based and explainable. It currently relies on finite,
+configurable keyword maps and deterministic token matching. Future embedding or
+LLM components can augment individual score components without replacing the
+ranking result contract.

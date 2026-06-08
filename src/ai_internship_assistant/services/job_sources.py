@@ -25,6 +25,10 @@ from ai_internship_assistant.domain.models import (
     SearchEmploymentType,
     WorkArrangement,
 )
+from ai_internship_assistant.services.job_normalization import (
+    JobDeduplicationService,
+    JobNormalizationService,
+)
 
 
 class MockJobTemplate(TypedDict):
@@ -198,8 +202,22 @@ class MockJobSource(JobSource):
 class JobSearchService:
     """Run query sets across job sources while preserving partial successes."""
 
-    def __init__(self, sources: Sequence[JobSource]) -> None:
+    def __init__(
+        self,
+        sources: Sequence[JobSource],
+        *,
+        normalize: bool = False,
+        deduplicate: bool = False,
+        normalization_service: JobNormalizationService | None = None,
+        deduplication_service: JobDeduplicationService | None = None,
+    ) -> None:
         self._sources = list(sources)
+        self._normalize = normalize or deduplicate
+        self._deduplicate = deduplicate
+        self._normalization_service = normalization_service or JobNormalizationService()
+        self._deduplication_service = deduplication_service or JobDeduplicationService(
+            self._normalization_service
+        )
 
     def search_all(self, query_set: JobSearchQuerySet) -> JobSearchResultSet:
         """Search every configured source for every query.
@@ -241,9 +259,19 @@ class JobSearchService:
                     )
                 )
 
+        normalized_jobs = (
+            self._normalization_service.normalize_many(jobs) if self._normalize else []
+        )
+        deduplication_result = (
+            self._deduplication_service.deduplicate(jobs) if self._deduplicate else None
+        )
+        clean_jobs = deduplication_result.unique_jobs if deduplication_result else jobs
+
         return JobSearchResultSet(
             query_set=query_set,
             source_results=source_results,
-            jobs=jobs,
+            jobs=clean_jobs,
+            normalized_jobs=normalized_jobs,
+            deduplication_result=deduplication_result,
             errors=errors,
         )

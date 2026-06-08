@@ -92,6 +92,44 @@ APIs, user cookies, logged-in pages, application POST endpoints, browser
 automation, or rate-limit avoidance. Tests use `httpx.MockTransport` and
 fixtures under `tests/fixtures/lever/`, so no live network calls occur.
 
+## Job Normalization And Deduplication
+
+`JobNormalizationService` creates a separate `NormalizedJobPosting` and never
+mutates the original provider posting. Normalization covers common title
+variants, a deliberately small company alias map, locations, remote variants,
+tracking-free URLs, description whitespace, and deterministic fingerprints.
+
+`JobDeduplicationService` is intentionally conservative. Identical normalized
+apply or source URLs are strong duplicate evidence. Text-based merging requires
+the same normalized company, highly similar title tokens, and the same known
+location. Unknown-location similarities below the merge threshold remain
+separate and generate warnings.
+
+Every `JobDeduplicationGroup` preserves a canonical job plus all original
+duplicate jobs and sources. Canonical selection favors completeness rather than
+provider preference alone. This allows future embedding similarity,
+LLM-assisted review, larger alias databases, and user-confirmed duplicate
+decisions without changing downstream clean-job consumers.
+
+## Job Fit Ranking
+
+`JobFitScoringService` consumes `CandidateProfile` and clean `JobPosting`
+objects. It produces independent `JobFitScore` objects and a deterministic
+`RankedJobResultSet`; neither input is mutated. Component weights and flag
+penalties are centralized in `JobFitScoringConfig`.
+
+The current rule-based engine scores role, skills, domain, experience level,
+employment type, location, certifications, and keywords. It records matched
+and missing evidence, disqualifying flags, warnings, and concise explanations.
+Ranking sorts by overall score, recommendation level, role relevance, posting
+date, company, title, and stable job ID.
+
+Known limitations are deliberate: keyword maps are finite, nearby-location
+logic is limited to exact or same-state matching, and deterministic token
+matching cannot understand all semantic role relationships. Future embedding,
+LLM job-analysis, and ATS components can replace or augment individual scores
+without changing downstream ranking consumers.
+
 ## Phase 1 Scope
 
 This scaffold includes:

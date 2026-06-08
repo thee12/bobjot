@@ -19,6 +19,14 @@ from ai_internship_assistant.services.greenhouse import (
     GreenhouseHttpClient,
     GreenhouseJobSource,
 )
+from ai_internship_assistant.services.job_normalization import (
+    JobDeduplicationService,
+    JobNormalizationService,
+)
+from ai_internship_assistant.services.job_ranking import (
+    JobFitScoringConfig,
+    JobFitScoringService,
+)
 from ai_internship_assistant.services.job_search_query_generator import (
     JobSearchQueryGenerationError,
     JobSearchQueryGenerator,
@@ -64,6 +72,10 @@ __all__ = [
     "LeverJobSource",
     "JobSearchQueryGenerationError",
     "JobSearchQueryGenerator",
+    "JobDeduplicationService",
+    "JobNormalizationService",
+    "JobFitScoringConfig",
+    "JobFitScoringService",
     "GreenhouseCompanyConfig",
     "GreenhouseHttpClient",
     "GreenhouseJobSource",

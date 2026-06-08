@@ -20,6 +20,8 @@ from ai_internship_assistant.domain.models.candidate_profile import (
 from ai_internship_assistant.domain.models.common import FileFormat, SourceFile
 from ai_internship_assistant.domain.models.job import (
     EmploymentType,
+    JobDeduplicationGroup,
+    JobDeduplicationResult,
     JobPosting,
     JobSearchErrorType,
     JobSearchResultSet,
@@ -27,7 +29,14 @@ from ai_internship_assistant.domain.models.job import (
     JobSourceError,
     JobSourceSearchResult,
     JobSourceType,
+    NormalizedJobPosting,
     WorkArrangement,
+)
+from ai_internship_assistant.domain.models.job_ranking import (
+    JobFitScore,
+    RankedJobResult,
+    RankedJobResultSet,
+    RecommendationLevel,
 )
 from ai_internship_assistant.domain.models.job_search import (
     JobSearchPreferences,
@@ -69,7 +78,10 @@ __all__ = [
     "FileFormat",
     "GeneratedResumeVersion",
     "JobDescriptionAnalysis",
+    "JobDeduplicationGroup",
+    "JobDeduplicationResult",
     "JobPosting",
+    "JobFitScore",
     "JobSearchErrorType",
     "JobSearchResultSet",
     "JobSearchPreferences",
@@ -79,12 +91,16 @@ __all__ = [
     "JobSourceError",
     "JobSourceSearchResult",
     "JobSourceType",
+    "NormalizedJobPosting",
     "Project",
     "ProfileGenerationResult",
     "ProfileValidationStatus",
     "Resume",
     "ResumeSkill",
     "QueryPriority",
+    "RankedJobResult",
+    "RankedJobResultSet",
+    "RecommendationLevel",
     "RemotePreference",
     "SearchEmploymentType",
     "Skill",
