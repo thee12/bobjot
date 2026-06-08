@@ -169,6 +169,26 @@ considerations. Typed settings control model, temperature, timeout, maximum
 input length, and feature flags. The API key is read from `OPENAI_API_KEY` and
 must not be committed.
 
+## Skill Gap Analysis
+
+`SkillGapAnalyzer` consumes a `CandidateProfile` and `JobAnalysis` and produces
+a separate `SkillGapReport`. It is deterministic, provider-independent, and
+does not mutate either input. The report separates matched required and
+preferred skills, missing skills, certification gaps, possible disqualifying
+concerns, learning recommendations, and resume-emphasis opportunities.
+
+Alias-aware normalization may establish factual equivalence, such as
+`Python3`/`Python` or `CompTIA Security+`/`Security+`. Conservative related-skill
+mappings can only create emphasis opportunities; they never count as direct
+matches and never make a missing skill safe to add to a resume. All missing
+skills have `safe_to_add_to_resume=false`.
+
+Overall severity considers required versus preferred gaps, internship
+seniority, related evidence, and explicit concerns. It does not make final
+legal or employment-eligibility decisions. The finite alias and related-skill
+maps are intentionally explainable and can be expanded without changing the
+stable report contract consumed by future ATS scoring and resume optimization.
+
 ## Phase 1 Scope
 
 This scaffold includes:

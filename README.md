@@ -78,6 +78,8 @@ Resume PDF/DOCX
   -> RuleBasedJobDescriptionAnalyzer.analyze()
   -> JobAnalysis(...)
   -> optional OpenAIJobDescriptionAnalyzer / HybridJobDescriptionAnalyzer
+  -> SkillGapAnalyzer.analyze(CandidateProfile, JobAnalysis)
+  -> SkillGapReport(...)
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -252,3 +254,35 @@ LLM and hybrid analysis are disabled by default for safe local development.
 Every LLM call has cost and latency, and structured extraction can still
 misclassify ambiguous language. Hybrid fallback and explicit analysis
 provenance make those limitations visible to downstream modules.
+
+### Skill Gap Analysis
+
+`SkillGapAnalyzer` deterministically compares a factual `CandidateProfile`
+against a structured `JobAnalysis`. It returns an independent `SkillGapReport`
+containing direct matches, missing required and preferred skills, certification
+gaps, possible disqualifying concerns, learning recommendations, and safe
+resume-emphasis opportunities. It makes no LLM or external API calls and does
+not mutate either input.
+
+Matching strength is intentionally explicit:
+
+- `EXACT`: candidate and job terminology match case-insensitively.
+- `NORMALIZED`: a centralized alias map proves equivalence, such as `Python3`
+  to `Python`, `AWS` to `Amazon Web Services`, or `CompTIA Security+` to
+  `Security+`.
+- `RELATED`: a conservative relationship exists, but it is not a direct claim.
+  Related evidence creates an emphasis opportunity only.
+- `NONE`: reserved for consumers that need to represent no match.
+
+Every missing skill has `safe_to_add_to_resume=false`. Related skills are also
+not safe direct claims. For example, Wireshark may support careful emphasis
+around packet analysis, but the system must not claim packet-analysis
+experience unless that evidence exists in the candidate profile. Certification
+recommendations likewise tell the candidate to learn about or pursue a
+credential, never to add an unearned credential.
+
+The report is the safety contract for future resume optimization: direct and
+normalized matches identify existing facts that may be emphasized; related
+opportunities explain cautious wording; gaps identify terms that must not be
+claimed. Current matching uses finite alias and relationship dictionaries and
+cannot understand every semantic relationship.

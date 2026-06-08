@@ -68,6 +68,11 @@ from ai_internship_assistant.services.resume_validation import (
     ResumeValidationError,
     ResumeValidator,
 )
+from ai_internship_assistant.services.skill_gap_analyzer import (
+    SkillGapAnalysisConfig,
+    SkillGapAnalysisError,
+    SkillGapAnalyzer,
+)
 
 __all__ = [
     "DocumentTextExtractor",
@@ -111,6 +116,9 @@ __all__ = [
     "ResumeParsingError",
     "ResumeValidationError",
     "RuleBasedJobDescriptionAnalyzer",
+    "SkillGapAnalysisConfig",
+    "SkillGapAnalysisError",
+    "SkillGapAnalyzer",
     "ResumeValidator",
     "UnsupportedDocumentFormatError",
     "extract_text",
