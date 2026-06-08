@@ -150,6 +150,25 @@ hybrid analyzers may augment semantic extraction behind the same protocol.
 Downstream ATS scoring, skill-gap analysis, and resume optimization should
 consume `JobAnalysis` rather than provider-specific raw text.
 
+`OpenAIJobDescriptionAnalyzer` now provides that structured provider-backed
+implementation using the versioned `job-description-analysis-v1` prompt. Its
+privacy boundary accepts only `JobPosting` fields and never candidate profiles
+or resume data. Provider responses are schema-validated, evidence snippets are
+bounded, and locally trusted identity and hash fields replace provider-supplied
+values.
+
+`HybridJobDescriptionAnalyzer` always creates rule-based analysis first. It
+prefers validated LLM section interpretation, retains exact deterministic
+keyword matches, deduplicates merged fields, and lowers confidence when role,
+domain, or seniority classifications disagree. Any expected LLM failure returns
+the rule-based result with a warning instead of interrupting the job pipeline.
+Analysis provenance is recorded as `RULE_BASED`, `LLM`, or `HYBRID`.
+
+LLM analysis is opt-in because it adds latency, cost, and provider privacy
+considerations. Typed settings control model, temperature, timeout, maximum
+input length, and feature flags. The API key is read from `OPENAI_API_KEY` and
+must not be committed.
+
 ## Phase 1 Scope
 
 This scaffold includes:

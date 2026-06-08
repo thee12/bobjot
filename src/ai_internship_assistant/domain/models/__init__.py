@@ -1,6 +1,7 @@
 """Core Pydantic models for resumes, jobs, ATS analysis, and applications."""
 
 from ai_internship_assistant.domain.models.analysis import (
+    AnalysisSource,
     AtsKeywordSet,
     AtsScore,
     JobAnalysis,
@@ -70,6 +71,7 @@ from ai_internship_assistant.domain.models.validation import (
 __all__ = [
     "ApplicationRecord",
     "ApplicationStatus",
+    "AnalysisSource",
     "AtsKeywordSet",
     "AtsScore",
     "Certification",

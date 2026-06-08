@@ -47,6 +47,15 @@ from ai_internship_assistant.services.lever import (
     LeverHttpClient,
     LeverJobSource,
 )
+from ai_internship_assistant.services.llm_job_description_analyzer import (
+    EmptyJobDescriptionError,
+    HybridJobDescriptionAnalyzer,
+    JobDescriptionAnalysisError,
+    LLMJobDescriptionAnalysisError,
+    MalformedJobAnalysisResponseError,
+    MissingJobAnalysisAPIKeyError,
+    OpenAIJobDescriptionAnalyzer,
+)
 from ai_internship_assistant.services.resume_parser import (
     EmptyResumeTextError,
     LLMResumeParsingError,
@@ -69,7 +78,11 @@ __all__ = [
     "CandidateProfileGenerator",
     "CandidateProfilePipeline",
     "DocumentExtractionError",
+    "EmptyJobDescriptionError",
     "EmptyResumeTextError",
+    "HybridJobDescriptionAnalyzer",
+    "JobDescriptionAnalysisError",
+    "LLMJobDescriptionAnalysisError",
     "LLMResumeParsingError",
     "LeverCompanyConfig",
     "LeverHttpClient",
@@ -88,7 +101,10 @@ __all__ = [
     "JobSource",
     "JobSourceSearchError",
     "MalformedLLMResponseError",
+    "MalformedJobAnalysisResponseError",
+    "MissingJobAnalysisAPIKeyError",
     "MockJobSource",
+    "OpenAIJobDescriptionAnalyzer",
     "OpenAIResumeParser",
     "ProfileGenerator",
     "ResumeParser",

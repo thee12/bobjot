@@ -77,6 +77,7 @@ Resume PDF/DOCX
   -> standardized JobPosting objects
   -> RuleBasedJobDescriptionAnalyzer.analyze()
   -> JobAnalysis(...)
+  -> optional OpenAIJobDescriptionAnalyzer / HybridJobDescriptionAnalyzer
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -210,3 +211,44 @@ skill-gap analysis, and factual resume optimization. Rule dictionaries and
 section heuristics are finite and cannot understand every job-posting format.
 Future `OpenAIJobDescriptionAnalyzer` and hybrid implementations can implement
 the same `JobDescriptionAnalyzer` protocol without changing downstream modules.
+
+### LLM And Hybrid Job Analysis
+
+`OpenAIJobDescriptionAnalyzer` uses OpenAI structured outputs to return the same
+validated `JobAnalysis` contract as the deterministic analyzer. It can interpret
+messy sections and vague wording, but its prompt strictly requires extraction
+from the supplied posting only. Locally controlled job identity, normalized
+title, text hash, provenance, and bounded evidence snippets are enforced after
+the provider response is validated.
+
+`HybridJobDescriptionAnalyzer` runs rule-based analysis first, then merges a
+validated LLM result conservatively:
+
+- LLM section interpretation is preferred for required versus preferred skills.
+- Exact rule-based keywords are retained when the LLM misses them.
+- ATS keywords and evidence-backed fields are deduplicated.
+- Confidence is reduced when role, domain, or seniority classifications disagree.
+- Missing keys, timeouts, provider failures, malformed responses, and empty
+  descriptions return the rule-based result with a warning.
+
+Structured outputs are required because downstream ATS scoring, skill-gap
+analysis, and resume optimization need a stable typed contract. Only job
+posting data is sent to this analyzer; it does not receive resumes or personal
+candidate information.
+
+Configuration is environment-driven:
+
+```text
+OPENAI_API_KEY=
+AI_INTERNSHIP_ASSISTANT_JOB_ANALYSIS_MODEL=gpt-4.1-mini
+AI_INTERNSHIP_ASSISTANT_JOB_ANALYSIS_TEMPERATURE=0.0
+AI_INTERNSHIP_ASSISTANT_JOB_ANALYSIS_TIMEOUT_SECONDS=30
+AI_INTERNSHIP_ASSISTANT_JOB_ANALYSIS_MAX_INPUT_LENGTH=30000
+AI_INTERNSHIP_ASSISTANT_ENABLE_LLM_ANALYSIS=false
+AI_INTERNSHIP_ASSISTANT_ENABLE_HYBRID_ANALYSIS=false
+```
+
+LLM and hybrid analysis are disabled by default for safe local development.
+Every LLM call has cost and latency, and structured extraction can still
+misclassify ambiguous language. Hybrid fallback and explicit analysis
+provenance make those limitations visible to downstream modules.

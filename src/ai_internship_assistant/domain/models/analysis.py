@@ -5,6 +5,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ai_internship_assistant.domain.models.job import JobSeniority
+
 
 class RequirementLevel(StrEnum):
     """How strongly a job posting requests a skill or qualification."""
@@ -26,6 +28,14 @@ class RoleCategory(StrEnum):
     DATA = "data"
     DEVOPS = "devops"
     UNKNOWN = "unknown"
+
+
+class AnalysisSource(StrEnum):
+    """Analyzer implementation that produced a job analysis."""
+
+    RULE_BASED = "rule_based"
+    LLM = "llm"
+    HYBRID = "hybrid"
 
 
 class SkillRequirement(BaseModel):
@@ -80,9 +90,11 @@ class JobAnalysis(BaseModel):
     seniority_indicators: list[str] = Field(default_factory=list)
     role_category: RoleCategory = RoleCategory.UNKNOWN
     domain_category: RoleCategory = RoleCategory.UNKNOWN
+    seniority: JobSeniority = JobSeniority.UNKNOWN
     confidence_score: float = Field(ge=0.0, le=1.0)
     warnings: list[str] = Field(default_factory=list)
     raw_text_hash: str
+    analysis_source: AnalysisSource = AnalysisSource.RULE_BASED
     analyzed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -98,4 +110,3 @@ class AtsScore(BaseModel):
     formatting_score: float = Field(ge=0.0, le=100.0)
     missing_keywords: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
-

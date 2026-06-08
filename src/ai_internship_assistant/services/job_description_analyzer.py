@@ -16,9 +16,11 @@ from collections.abc import Iterable, Sequence
 from typing import Protocol
 
 from ai_internship_assistant.domain.models import (
+    AnalysisSource,
     EmploymentType,
     JobAnalysis,
     JobPosting,
+    JobSeniority,
     RequirementLevel,
     RoleCategory,
     SkillRequirement,
@@ -334,6 +336,7 @@ class RuleBasedJobDescriptionAnalyzer:
             seniority_indicators=seniority_indicators,
             role_category=role_category,
             domain_category=role_category,
+            seniority=self._seniority(job, internship_indicators, seniority_indicators),
             confidence_score=self._confidence(
                 combined_text=combined_text,
                 responsibilities=responsibilities,
@@ -342,6 +345,7 @@ class RuleBasedJobDescriptionAnalyzer:
             ),
             warnings=warnings,
             raw_text_hash=hashlib.sha256(combined_text.encode()).hexdigest(),
+            analysis_source=AnalysisSource.RULE_BASED,
         )
 
     def _combined_lines(self, job: JobPosting) -> list[str]:
@@ -505,6 +509,26 @@ class RuleBasedJobDescriptionAnalyzer:
         if not scores or max(scores.values(), default=0) == 0:
             return RoleCategory.UNKNOWN
         return max(scores, key=lambda category: scores[category])
+
+    def _seniority(
+        self,
+        job: JobPosting,
+        internship_indicators: Sequence[str],
+        seniority_indicators: Sequence[str],
+    ) -> JobSeniority:
+        if internship_indicators or job.employment_type == EmploymentType.INTERNSHIP:
+            return JobSeniority.INTERNSHIP
+        if seniority_indicators:
+            return JobSeniority.SENIOR
+
+        title = self._normalize(job.title)
+        if "entry level" in title or "early career" in title:
+            return JobSeniority.ENTRY_LEVEL
+        if "junior" in title or re.search(r"\b(?:jr|i)\b", title):
+            return JobSeniority.JUNIOR
+        if "mid level" in title or re.search(r"\bii\b", title):
+            return JobSeniority.MID_LEVEL
+        return job.seniority
 
     def _ats_keywords(self, title: str, text: str, signals: Sequence[str]) -> list[str]:
         repeated = Counter(
