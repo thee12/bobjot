@@ -1,0 +1,11 @@
+SOC Analyst Intern
+
+What You Will Do
+Perform alert triage and log analysis in a security operations center.
+Assist with incident response and threat detection.
+
+Minimum Qualifications
+Hands-on experience with Linux and networking.
+
+Nice to Have
+Exposure to Splunk, Wireshark, and Security+.

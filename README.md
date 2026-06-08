@@ -75,6 +75,8 @@ Resume PDF/DOCX
   -> JobSearchService.search_all()
   -> JobSearchResultSet(...)
   -> standardized JobPosting objects
+  -> RuleBasedJobDescriptionAnalyzer.analyze()
+  -> JobAnalysis(...)
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -186,3 +188,25 @@ Scoring is rule-based and explainable. It currently relies on finite,
 configurable keyword maps and deterministic token matching. Future embedding or
 LLM components can augment individual score components without replacing the
 ranking result contract.
+
+### Job Description Analysis
+
+`RuleBasedJobDescriptionAnalyzer` converts a standardized `JobPosting` into a
+provider-independent `JobAnalysis`. It cleans HTML and repeated lines, preserves
+source wording for responsibilities and qualifications, and extracts explicit
+skills, tools, languages, frameworks, cloud platforms, cybersecurity terms,
+certifications, soft skills, education, experience, internship signals,
+seniority signals, and possible disqualifying requirements.
+
+Phase 4A is intentionally deterministic and makes no LLM or external API calls.
+Each required or preferred skill includes its source evidence and confidence.
+Unclear evidence remains `UNKNOWN`; the analyzer prefers a missing field over an
+invented or over-inferred requirement. Results include a text hash, confidence
+score, and warnings for sparse, senior-level, unclear, or unusually long
+postings.
+
+The structured output is the future input contract for ATS resume/job matching,
+skill-gap analysis, and factual resume optimization. Rule dictionaries and
+section heuristics are finite and cannot understand every job-posting format.
+Future `OpenAIJobDescriptionAnalyzer` and hybrid implementations can implement
+the same `JobDescriptionAnalyzer` protocol without changing downstream modules.

@@ -3,7 +3,11 @@
 from ai_internship_assistant.domain.models.analysis import (
     AtsKeywordSet,
     AtsScore,
+    JobAnalysis,
     JobDescriptionAnalysis,
+    RequirementLevel,
+    RoleCategory,
+    SkillRequirement,
 )
 from ai_internship_assistant.domain.models.application import (
     ApplicationRecord,
@@ -78,6 +82,7 @@ __all__ = [
     "FileFormat",
     "GeneratedResumeVersion",
     "JobDescriptionAnalysis",
+    "JobAnalysis",
     "JobDeduplicationGroup",
     "JobDeduplicationResult",
     "JobPosting",
@@ -101,9 +106,12 @@ __all__ = [
     "RankedJobResult",
     "RankedJobResultSet",
     "RecommendationLevel",
+    "RequirementLevel",
+    "RoleCategory",
     "RemotePreference",
     "SearchEmploymentType",
     "Skill",
+    "SkillRequirement",
     "SourceFile",
     "UserPreferences",
     "ValidationCategory",

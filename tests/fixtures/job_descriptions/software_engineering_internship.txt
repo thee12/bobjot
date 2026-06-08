@@ -1,0 +1,12 @@
+Software Engineering Intern
+
+Responsibilities
+Build and test Python APIs.
+Collaborate with engineers and document changes in GitHub.
+
+Requirements
+Currently pursuing a bachelor's degree in computer science.
+Experience with Python, SQL, Git, and FastAPI.
+
+Preferred Qualifications
+Familiar with Docker, AWS, and React.

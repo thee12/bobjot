@@ -1,0 +1,12 @@
+Network Engineering Intern
+
+Responsibilities
+Support network security, routing, switching, DNS, and firewall operations.
+Use Wireshark to troubleshoot network traffic.
+
+Qualifications
+Currently pursuing an associate's or bachelor's degree in information technology.
+Knowledge of Linux and TCP/IP.
+
+Preferred Qualifications
+CCNA preferred.

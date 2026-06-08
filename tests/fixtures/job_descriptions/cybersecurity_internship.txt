@@ -1,0 +1,14 @@
+Cybersecurity Internship
+
+Responsibilities
+Monitor security logs and investigate alerts using Splunk.
+Document incident response findings and support vulnerability management.
+
+Required Qualifications
+Currently pursuing a bachelor's degree in cybersecurity or computer science.
+Experience with Python, Linux, network security, and Git.
+Security+ required.
+
+Preferred Qualifications
+Familiar with Wireshark, SIEM, and the MITRE ATT&CK framework.
+Strong communication and attention to detail.

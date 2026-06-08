@@ -130,6 +130,26 @@ matching cannot understand all semantic role relationships. Future embedding,
 LLM job-analysis, and ATS components can replace or augment individual scores
 without changing downstream ranking consumers.
 
+## Job Description Analysis
+
+`RuleBasedJobDescriptionAnalyzer` is the first implementation of the
+`JobDescriptionAnalyzer` protocol. It consumes standardized `JobPosting`
+objects and returns immutable-by-convention, strongly typed `JobAnalysis`
+results without mutating source postings or making network calls.
+
+The analyzer combines normalized posting fields with selected textual provider
+fields, cleans HTML and duplicate lines, and applies centralized term catalogs,
+section-aware requirement classification, and conservative regular-expression
+checks. Extracted `SkillRequirement` entries preserve evidence and distinguish
+required, preferred, nice-to-have, and unknown context. Ambiguous requirements
+remain unknown.
+
+The rule-based implementation is explainable and suitable for tests, but its
+catalogs and section heuristics are intentionally finite. Future OpenAI and
+hybrid analyzers may augment semantic extraction behind the same protocol.
+Downstream ATS scoring, skill-gap analysis, and resume optimization should
+consume `JobAnalysis` rather than provider-specific raw text.
+
 ## Phase 1 Scope
 
 This scaffold includes:

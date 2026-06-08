@@ -19,6 +19,10 @@ from ai_internship_assistant.services.greenhouse import (
     GreenhouseHttpClient,
     GreenhouseJobSource,
 )
+from ai_internship_assistant.services.job_description_analyzer import (
+    JobDescriptionAnalyzer,
+    RuleBasedJobDescriptionAnalyzer,
+)
 from ai_internship_assistant.services.job_normalization import (
     JobDeduplicationService,
     JobNormalizationService,
@@ -76,6 +80,7 @@ __all__ = [
     "JobNormalizationService",
     "JobFitScoringConfig",
     "JobFitScoringService",
+    "JobDescriptionAnalyzer",
     "GreenhouseCompanyConfig",
     "GreenhouseHttpClient",
     "GreenhouseJobSource",
@@ -89,6 +94,7 @@ __all__ = [
     "ResumeParser",
     "ResumeParsingError",
     "ResumeValidationError",
+    "RuleBasedJobDescriptionAnalyzer",
     "ResumeValidator",
     "UnsupportedDocumentFormatError",
     "extract_text",
