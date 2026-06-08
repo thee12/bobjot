@@ -1,0 +1,69 @@
+{
+  "jobs": [
+    {
+      "id": 1001,
+      "title": "Cybersecurity Intern",
+      "updated_at": "2026-05-20T10:30:00-04:00",
+      "location": {
+        "name": "Raleigh, NC"
+      },
+      "absolute_url": "https://boards.greenhouse.io/example/jobs/1001",
+      "content": "&lt;p&gt;Join our security operations team as a cybersecurity intern. Work with Linux and network security monitoring.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 1,
+          "name": "Information Security"
+        }
+      ],
+      "offices": [
+        {
+          "id": 10,
+          "name": "Raleigh",
+          "location": "Raleigh, NC, United States"
+        }
+      ]
+    },
+    {
+      "id": 1002,
+      "title": "Software Engineering Intern",
+      "updated_at": "2026-05-21T12:00:00Z",
+      "location": {
+        "name": "Remote - United States"
+      },
+      "absolute_url": "https://boards.greenhouse.io/example/jobs/1002",
+      "content": "&lt;p&gt;Build Python services with the software engineering team. This internship is remote.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 2,
+          "name": "Engineering"
+        }
+      ],
+      "offices": []
+    },
+    {
+      "id": 1003,
+      "title": "Senior Security Engineer",
+      "updated_at": "2026-05-22T12:00:00Z",
+      "location": {
+        "name": "Raleigh, NC"
+      },
+      "absolute_url": "https://boards.greenhouse.io/example/jobs/1003",
+      "content": "&lt;p&gt;Lead security architecture and incident response.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 1,
+          "name": "Information Security"
+        }
+      ],
+      "offices": [
+        {
+          "id": 10,
+          "name": "Raleigh"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "total": 3
+  }
+}

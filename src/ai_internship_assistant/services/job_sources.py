@@ -68,6 +68,11 @@ class JobSource(ABC):
     def search(self, query: JobSearchQuery) -> list[JobPosting]:
         """Search one source and return standardized job postings."""
 
+    def errors_for_query(self, query: JobSearchQuery) -> list[JobSourceError]:
+        """Return structured partial errors recorded while searching a query."""
+
+        return []
+
 
 class MockJobSource(JobSource):
     """Development-only source returning realistic fake standardized jobs.
@@ -212,7 +217,8 @@ class JobSearchService:
             for query in query_set.queries:
                 try:
                     source_jobs = source.search(query)
-                    result_errors: list[JobSourceError] = []
+                    result_errors = source.errors_for_query(query)
+                    errors.extend(result_errors)
                 except JobSourceSearchError as exc:
                     source_jobs = []
                     source_error = JobSourceError(

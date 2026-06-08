@@ -13,6 +13,12 @@ from ai_internship_assistant.services.document_extraction import (
     UnsupportedDocumentFormatError,
     extract_text,
 )
+from ai_internship_assistant.services.greenhouse import (
+    DEFAULT_GREENHOUSE_COMPANIES,
+    GreenhouseCompanyConfig,
+    GreenhouseHttpClient,
+    GreenhouseJobSource,
+)
 from ai_internship_assistant.services.job_search_query_generator import (
     JobSearchQueryGenerationError,
     JobSearchQueryGenerator,
@@ -22,6 +28,12 @@ from ai_internship_assistant.services.job_sources import (
     JobSource,
     JobSourceSearchError,
     MockJobSource,
+)
+from ai_internship_assistant.services.lever import (
+    DEFAULT_LEVER_COMPANIES,
+    LeverCompanyConfig,
+    LeverHttpClient,
+    LeverJobSource,
 )
 from ai_internship_assistant.services.resume_parser import (
     EmptyResumeTextError,
@@ -38,6 +50,8 @@ from ai_internship_assistant.services.resume_validation import (
 
 __all__ = [
     "DocumentTextExtractor",
+    "DEFAULT_GREENHOUSE_COMPANIES",
+    "DEFAULT_LEVER_COMPANIES",
     "CorruptedDocumentError",
     "CandidateProfileGenerationError",
     "CandidateProfileGenerator",
@@ -45,8 +59,14 @@ __all__ = [
     "DocumentExtractionError",
     "EmptyResumeTextError",
     "LLMResumeParsingError",
+    "LeverCompanyConfig",
+    "LeverHttpClient",
+    "LeverJobSource",
     "JobSearchQueryGenerationError",
     "JobSearchQueryGenerator",
+    "GreenhouseCompanyConfig",
+    "GreenhouseHttpClient",
+    "GreenhouseJobSource",
     "JobSearchService",
     "JobSource",
     "JobSourceSearchError",

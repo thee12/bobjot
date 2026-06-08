@@ -1,0 +1,69 @@
+[
+  {
+    "id": "lever-security-1",
+    "text": "Cybersecurity Intern",
+    "hostedUrl": "https://jobs.lever.co/example/lever-security-1",
+    "applyUrl": "https://jobs.lever.co/example/lever-security-1/apply",
+    "categories": {
+      "location": "Raleigh, NC",
+      "allLocations": ["Raleigh, NC"],
+      "commitment": "Intern",
+      "team": "Security",
+      "department": "Information Security"
+    },
+    "descriptionPlain": "Join the security operations team and support network security monitoring.",
+    "lists": [
+      {
+        "text": "Responsibilities",
+        "content": "<ul><li>Assist with security alert triage.</li><li>Document investigation findings.</li></ul>"
+      },
+      {
+        "text": "Requirements",
+        "content": "<ul><li>Knowledge of Linux and networking.</li></ul>"
+      },
+      {
+        "text": "Preferred Qualifications",
+        "content": "<ul><li>Security+ certification.</li></ul>"
+      }
+    ],
+    "additionalPlain": "This is a student program.",
+    "workplaceType": "hybrid",
+    "createdAt": 1779235200000,
+    "salaryRange": {
+      "currency": "USD",
+      "interval": "year",
+      "min": 50000,
+      "max": 65000
+    }
+  },
+  {
+    "id": "lever-software-1",
+    "text": "Software Engineering Intern",
+    "hostedUrl": "https://jobs.lever.co/example/lever-software-1",
+    "applyUrl": "https://jobs.lever.co/example/lever-software-1/apply",
+    "categories": {
+      "location": "Remote - United States",
+      "allLocations": ["Remote - United States"],
+      "commitment": "Internship",
+      "team": "Engineering"
+    },
+    "descriptionPlain": "Build Python services with the software engineering team.",
+    "lists": [],
+    "workplaceType": "remote",
+    "createdAt": 1779321600000
+  },
+  {
+    "id": "lever-senior-1",
+    "text": "Senior Security Engineer",
+    "hostedUrl": "https://jobs.lever.co/example/lever-senior-1",
+    "applyUrl": "https://jobs.lever.co/example/lever-senior-1/apply",
+    "categories": {
+      "location": "Raleigh, NC",
+      "commitment": "Full-time",
+      "team": "Security"
+    },
+    "descriptionPlain": "Lead security architecture and incident response.",
+    "workplaceType": "on-site",
+    "createdAt": 1779408000000
+  }
+]

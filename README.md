@@ -95,3 +95,42 @@ The job source layer defines a provider-neutral `JobSource` interface. Future
 Greenhouse, Lever, and company career-page integrations will normalize their
 provider responses into the same `JobPosting` model. The included
 `MockJobSource` is development-only and performs no network calls.
+
+### Greenhouse Source
+
+`GreenhouseJobSource` is the first real provider adapter. It uses only the
+public, unauthenticated Greenhouse Job Board GET endpoint and never submits
+applications or accesses private recruiting data.
+
+Add boards by constructing `GreenhouseCompanyConfig` entries with:
+
+- `company_name`: display name stored on normalized postings
+- `board_token`: public token from `boards.greenhouse.io/{board_token}`
+- `base_url`: optional public board URL
+- `enabled`: whether the board should be searched
+- `tags`: editable metadata for future filtering
+
+The checked-in seed configuration is a disabled placeholder. Requests use a
+clear user agent, timeout, optional delay between company boards, and no
+automatic rate-limit bypass. Unit tests use mocked HTTP responses only.
+
+### Lever Source
+
+`LeverJobSource` uses only Lever's public published-postings GET endpoint:
+`https://api.lever.co/v0/postings/{company_slug}?mode=json`. It never accesses
+private postings, submits applications, or uses authentication credentials.
+
+Add sites by constructing `LeverCompanyConfig` entries with:
+
+- `company_name`: display name stored on normalized postings
+- `company_slug`: public site name from `jobs.lever.co/{company_slug}`
+- `base_url`: optional public Lever job-site URL
+- `enabled`: whether the site should be searched
+- `tags`: editable metadata for future filtering
+
+Lever exposes a JSON list directly, while Greenhouse wraps jobs in a board
+response object. Both adapters use shared deterministic matching and normalize
+their provider-specific fields into `JobPosting`. Lever list sections are
+classified into responsibilities, requirements, and preferred qualifications
+when headings make that classification clear. Unit tests use mocked HTTP
+responses only.

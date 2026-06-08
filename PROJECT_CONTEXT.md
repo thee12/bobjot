@@ -56,6 +56,42 @@ not silently swallowed.
 `MockJobSource` returns realistic fake postings for tests and local development.
 It must not be treated as a production provider and performs no HTTP requests.
 
+## Greenhouse Integration
+
+`GreenhouseJobSource` implements `JobSource` using Greenhouse's public Job Board
+API list-jobs endpoint with `content=true`. A `GreenhouseCompanyConfig` defines
+each editable company board by its public `board_token`. The adapter filters
+jobs deterministically, normalizes matches into `JobPosting`, preserves the raw
+Greenhouse payload, and records board-level failures without discarding results
+from successful boards.
+
+The integration uses no private APIs, authentication bypasses, cookies, login
+pages, application automation, or rate-limit avoidance. The adapter treats
+Greenhouse `updated_at` as the best available public date approximation for
+`posted_date`; downstream modules should not assume it is the original posting
+date. Tests use `httpx.MockTransport` and fixtures under
+`tests/fixtures/greenhouse/`, so the test suite makes no live network calls.
+
+## Lever Integration
+
+`LeverJobSource` implements `JobSource` using Lever's public Postings API in
+JSON mode. A `LeverCompanyConfig` identifies each editable public site by its
+`company_slug`, matching the public URL pattern
+`jobs.lever.co/{company_slug}`. The adapter defensively maps Lever posting
+fields, categories, list sections, salary ranges, workplace type, and creation
+timestamps into the standardized `JobPosting` contract while preserving the
+raw posting payload.
+
+Greenhouse returns a board response containing a `jobs` list, while Lever
+returns the postings list directly and provides richer structured categories
+and list sections. Both sources share deterministic role, location, seniority,
+employment-type, and work-arrangement helpers.
+
+The Lever integration uses published public data only. It does not use private
+APIs, user cookies, logged-in pages, application POST endpoints, browser
+automation, or rate-limit avoidance. Tests use `httpx.MockTransport` and
+fixtures under `tests/fixtures/lever/`, so no live network calls occur.
+
 ## Phase 1 Scope
 
 This scaffold includes:
