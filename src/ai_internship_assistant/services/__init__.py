@@ -16,8 +16,7 @@ from ai_internship_assistant.services.resume_parser import (
     ResumeParsingError,
 )
 from ai_internship_assistant.services.resume_validation import (
-    ResumeValidationWarning,
-    ResumeValidationWarningCode,
+    ResumeValidationError,
     ResumeValidator,
 )
 
@@ -31,8 +30,7 @@ __all__ = [
     "OpenAIResumeParser",
     "ResumeParser",
     "ResumeParsingError",
-    "ResumeValidationWarning",
-    "ResumeValidationWarningCode",
+    "ResumeValidationError",
     "ResumeValidator",
     "UnsupportedDocumentFormatError",
     "extract_text",

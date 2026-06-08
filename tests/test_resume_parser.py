@@ -11,16 +11,14 @@ from ai_internship_assistant.domain.models import (
     Project,
     Resume,
     Skill,
+    ValidationCategory,
 )
 from ai_internship_assistant.services.resume_parser import (
     EmptyResumeTextError,
     MalformedLLMResponseError,
     OpenAIResumeParser,
 )
-from ai_internship_assistant.services.resume_validation import (
-    ResumeValidationWarningCode,
-    ResumeValidator,
-)
+from ai_internship_assistant.services.resume_validation import ResumeValidator
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -240,12 +238,10 @@ def test_resume_validator_returns_non_blocking_warnings() -> None:
         ],
     )
 
-    warnings = ResumeValidator().validate(resume)
-    warning_codes = {warning.code for warning in warnings}
+    report = ResumeValidator().validate(resume)
+    issue_categories = {issue.category for issue in report.issues}
 
-    assert ResumeValidationWarningCode.MISSING_NAME in warning_codes
-    assert ResumeValidationWarningCode.MISSING_EDUCATION in warning_codes
-    assert ResumeValidationWarningCode.DUPLICATE_SKILL in warning_codes
-    assert ResumeValidationWarningCode.MALFORMED_EMAIL in warning_codes
-    assert ResumeValidationWarningCode.MALFORMED_URL in warning_codes
-
+    assert report.warning_count >= 4
+    assert ValidationCategory.CONTACT in issue_categories
+    assert ValidationCategory.EDUCATION in issue_categories
+    assert ValidationCategory.SKILL in issue_categories

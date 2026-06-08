@@ -22,6 +22,12 @@ from ai_internship_assistant.domain.models.resume import (
     ResumeSkill,
     Skill,
 )
+from ai_internship_assistant.domain.models.validation import (
+    ValidationCategory,
+    ValidationIssue,
+    ValidationReport,
+    ValidationSeverity,
+)
 
 __all__ = [
     "ApplicationRecord",
@@ -43,4 +49,8 @@ __all__ = [
     "Skill",
     "SourceFile",
     "UserPreferences",
+    "ValidationCategory",
+    "ValidationIssue",
+    "ValidationReport",
+    "ValidationSeverity",
 ]
