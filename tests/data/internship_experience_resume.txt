@@ -1,0 +1,17 @@
+Taylor Kim
+taylor.kim@example.com | 555-0404 | Seattle, WA
+LinkedIn: https://www.linkedin.com/in/taylorkim
+
+Education
+Pacific Technical Institute, B.S. Software Engineering, 2022-2026
+
+Technical Skills
+Programming Languages: Python, Java
+Frameworks: Spring Boot
+Tools: Git, Postman
+
+Experience
+Software Engineering Intern, Contoso Health, June 2025-August 2025
+- Implemented API endpoint tests for appointment scheduling services.
+- Used Java, Spring Boot, and Postman.
+

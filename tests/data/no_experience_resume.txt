@@ -1,0 +1,15 @@
+Sam Rivera
+sam.rivera@example.com | 555-0505
+
+Education
+Lakeside College, B.S. Computer Science, 2023-2027
+
+Technical Skills
+Programming Languages: Python, C++
+Tools: Git
+
+Projects
+Personal Budget CLI
+- Created a command line budget tracker for personal use.
+- Used Python.
+

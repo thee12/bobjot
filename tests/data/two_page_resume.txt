@@ -1,0 +1,28 @@
+Jordan Lee
+jordan.lee@example.com | 555-0202 | Austin, TX
+LinkedIn: https://www.linkedin.com/in/jordanlee
+
+Education
+Central College, B.S. Information Systems, 2021-2025
+
+Technical Skills
+Programming Languages: Python, JavaScript
+Frameworks: React, Flask
+Tools: GitHub Actions, Linux
+
+Experience
+IT Support Intern, Northwind Labs, May 2024-August 2024
+- Resolved help desk tickets for internal users.
+- Documented troubleshooting steps in the team knowledge base.
+
+Projects
+Inventory Dashboard
+- Created a dashboard for class inventory data.
+- Used React, Flask, and SQLite.
+
+--- Page 2 ---
+
+Leadership
+Computing Club Treasurer, 2023-2024
+- Managed meeting logistics and budget notes.
+

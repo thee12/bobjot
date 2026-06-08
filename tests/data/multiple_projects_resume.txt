@@ -1,0 +1,20 @@
+Priya Shah
+priya.shah@example.com | 555-0303
+GitHub: https://github.com/priyashah
+
+Education
+Metro University, B.S. Data Science, 2022-2026
+
+Skills
+Programming Languages: Python, R
+Tools: Jupyter, Tableau
+
+Projects
+Housing Price Analysis
+- Analyzed housing data for a statistics course.
+- Used Python, pandas, and Jupyter.
+
+Campus Events Explorer
+- Built a small web app to browse campus events.
+- Used Streamlit and SQLite.
+

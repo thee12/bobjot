@@ -1,0 +1,18 @@
+RILEY PATEL
+CONTACT -> riley.patel@example.com / 555-0606 / https://github.com/rileypatel
+
+EDU :: Urban University :: B.A. Digital Technology :: 2020 - 2024
+
+[SKILLS]
+Python :: JavaScript :: Node.js :: Figma :: Git
+
+SELECTED WORK
+Research Assistant @ Urban University Lab
+Dates: Jan 2024 - May 2024
+* Cleaned survey exports for a student research project.
+* Used Python scripts and spreadsheets.
+
+PROJECT // Portfolio Site
+* Built a personal portfolio website.
+* Technologies: JavaScript, Node.js
+

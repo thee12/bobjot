@@ -101,11 +101,12 @@ def test_empty_required_fields_are_rejected() -> None:
         Certification(name=" ")
 
 
-def test_invalid_email_is_rejected() -> None:
-    """Resume contact email should be rejected when malformed."""
+def test_malformed_email_can_be_constructed_for_warning_validation() -> None:
+    """Malformed extracted emails should not prevent Resume construction."""
 
-    with pytest.raises(ValidationError):
-        Resume(full_name="Example Candidate", email="not-an-email")
+    resume = Resume(full_name="Example Candidate", email="not-an-email")
+
+    assert resume.email == "not-an-email"
 
 
 def test_resume_requires_some_content() -> None:
@@ -120,4 +121,3 @@ def test_extra_fields_are_rejected() -> None:
 
     with pytest.raises(ValidationError):
         Skill(name="Python", years=2)
-

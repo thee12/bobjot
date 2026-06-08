@@ -58,5 +58,17 @@ mypy src
 
 ## Current Status
 
-Phase 1 is intentionally limited to architecture, models, configuration, and placeholder modules.
+The current extraction pipeline supports:
 
+```text
+Resume PDF/DOCX
+  -> extract_text()
+  -> raw text
+  -> OpenAIResumeParser.parse()
+  -> Resume(...)
+  -> ResumeValidator.validate()
+  -> structured resume plus non-blocking validation warnings
+```
+
+The parser performs extraction only. It does not optimize, rewrite, score, or
+tailor resumes.

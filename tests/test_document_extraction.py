@@ -6,6 +6,7 @@ import pytest
 from docx import Document
 
 from ai_internship_assistant.services.document_extraction import (
+    CorruptedDocumentError,
     DocumentTextExtractor,
     UnsupportedDocumentFormatError,
     extract_text,
@@ -116,3 +117,22 @@ def test_missing_document_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         DocumentTextExtractor().extract_text(tmp_path / "missing.pdf")
 
+
+def test_corrupted_pdf_is_rejected(tmp_path: Path) -> None:
+    """Unreadable PDF files should raise a meaningful extraction error."""
+
+    corrupted_pdf = tmp_path / "corrupted.pdf"
+    corrupted_pdf.write_bytes(b"not a real pdf")
+
+    with pytest.raises(CorruptedDocumentError):
+        DocumentTextExtractor().extract_text(corrupted_pdf)
+
+
+def test_invalid_docx_is_rejected(tmp_path: Path) -> None:
+    """Unreadable DOCX files should raise a meaningful extraction error."""
+
+    invalid_docx = tmp_path / "invalid.docx"
+    invalid_docx.write_bytes(b"not a real docx")
+
+    with pytest.raises(CorruptedDocumentError):
+        DocumentTextExtractor().extract_text(invalid_docx)

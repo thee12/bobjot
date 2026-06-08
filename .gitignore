@@ -27,6 +27,8 @@ dist/
 
 # Application data
 data/
+!tests/data/
+!tests/data/*.txt
 artifacts/
 generated_resumes/
 
@@ -35,4 +37,3 @@ generated_resumes/
 Thumbs.db
 .idea/
 .vscode/
-

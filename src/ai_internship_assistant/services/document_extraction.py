@@ -6,15 +6,28 @@ domain objects.
 """
 
 from pathlib import Path
+from zipfile import BadZipFile
 
 import pdfplumber
 from docx import Document
+from docx.opc.exceptions import PackageNotFoundError
+from pdfminer.pdfdocument import PDFPasswordIncorrect
+from pdfminer.pdfparser import PDFSyntaxError
+from pdfplumber.utils.exceptions import PdfminerException
 
 from ai_internship_assistant.domain.models.common import FileFormat
 
 
+class DocumentExtractionError(RuntimeError):
+    """Base exception for document extraction failures."""
+
+
 class UnsupportedDocumentFormatError(ValueError):
     """Raised when a file extension is not supported for text extraction."""
+
+
+class CorruptedDocumentError(DocumentExtractionError):
+    """Raised when a supported document cannot be read as its claimed format."""
 
 
 class DocumentTextExtractor:
@@ -59,19 +72,27 @@ class DocumentTextExtractor:
         """Extract page text from a PDF using pdfplumber."""
 
         page_text: list[str] = []
-        with pdfplumber.open(path) as pdf:
-            for page in pdf.pages:
-                text = page.extract_text() or ""
-                cleaned_text = text.strip()
-                if cleaned_text:
-                    page_text.append(cleaned_text)
+        try:
+            with pdfplumber.open(path) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text() or ""
+                    cleaned_text = text.strip()
+                    if cleaned_text:
+                        page_text.append(cleaned_text)
+        except (PDFSyntaxError, PDFPasswordIncorrect, PdfminerException) as exc:
+            msg = f"PDF document could not be read: {path}"
+            raise CorruptedDocumentError(msg) from exc
 
         return "\n\n".join(page_text)
 
     def _extract_docx_text(self, path: Path) -> str:
         """Extract paragraph and table text from a DOCX file using python-docx."""
 
-        document = Document(path)
+        try:
+            document = Document(str(path))
+        except (BadZipFile, PackageNotFoundError) as exc:
+            msg = f"DOCX document could not be read: {path}"
+            raise CorruptedDocumentError(msg) from exc
         blocks: list[str] = []
 
         for paragraph in document.paragraphs:
@@ -92,4 +113,3 @@ def extract_text(file_path: str | Path) -> str:
     """Convenience function for extracting plain text from a supported document."""
 
     return DocumentTextExtractor().extract_text(file_path)
-

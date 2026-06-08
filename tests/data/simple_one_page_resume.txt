@@ -1,0 +1,18 @@
+Alex Morgan
+alex.morgan@example.com | 555-0101 | New York, NY
+LinkedIn: https://www.linkedin.com/in/alexmorgan
+GitHub: https://github.com/alexmorgan
+
+Education
+State University, B.S. Computer Science, 2022-2026
+
+Technical Skills
+Programming Languages: Python, SQL
+Frameworks: FastAPI
+Tools: Git, Docker
+
+Projects
+Course Scheduler
+- Built a scheduling tool for student project teams.
+- Used Python and FastAPI.
+

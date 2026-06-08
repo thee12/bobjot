@@ -5,7 +5,6 @@ components must treat these facts as the source of truth and must not invent
 new experience, dates, credentials, tools, employers, projects, or metrics.
 """
 
-import re
 from typing import Annotated
 
 from pydantic import (
@@ -13,7 +12,6 @@ from pydantic import (
     ConfigDict,
     Field,
     StringConstraints,
-    field_validator,
     model_validator,
 )
 
@@ -21,9 +19,6 @@ from ai_internship_assistant.domain.models.common import SourceFile
 
 type NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 type OptionalCleanStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
-
-_EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-
 
 class ResumeBaseModel(BaseModel):
     """Base model settings shared by resume domain objects."""
@@ -94,6 +89,8 @@ class Resume(ResumeBaseModel):
     email: OptionalCleanStr | None = None
     phone: OptionalCleanStr | None = None
     location: OptionalCleanStr | None = None
+    linkedin_url: OptionalCleanStr | None = None
+    github_url: OptionalCleanStr | None = None
     links: list[NonEmptyStr] = Field(default_factory=list)
     summary: OptionalCleanStr | None = None
     education: list[Education] = Field(default_factory=list)
@@ -102,21 +99,21 @@ class Resume(ResumeBaseModel):
     certifications: list[Certification] = Field(default_factory=list)
     skills: list[Skill] = Field(default_factory=list)
 
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, email: str | None) -> str | None:
-        """Reject malformed email addresses when contact email is provided."""
-
-        if email is not None and _EMAIL_PATTERN.fullmatch(email) is None:
-            msg = "email must be a valid email address"
-            raise ValueError(msg)
-        return email
-
     @model_validator(mode="after")
     def require_resume_content(self) -> "Resume":
         """Require at least one meaningful resume field."""
 
-        has_contact = any([self.full_name, self.email, self.phone, self.location, self.links])
+        has_contact = any(
+            [
+                self.full_name,
+                self.email,
+                self.phone,
+                self.location,
+                self.linkedin_url,
+                self.github_url,
+                self.links,
+            ]
+        )
         has_sections = any(
             [
                 self.summary,
