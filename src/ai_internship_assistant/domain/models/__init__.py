@@ -20,6 +20,7 @@ from ai_internship_assistant.domain.models.resume import (
     Project,
     Resume,
     ResumeSkill,
+    Skill,
 )
 
 __all__ = [
@@ -39,7 +40,7 @@ __all__ = [
     "Project",
     "Resume",
     "ResumeSkill",
+    "Skill",
     "SourceFile",
     "UserPreferences",
 ]
-
