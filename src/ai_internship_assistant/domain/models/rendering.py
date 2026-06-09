@@ -55,6 +55,25 @@ class ResumeRenderOptions(BaseModel):
     source_version_id: str | None = None
 
 
+class DocxRenderOptions(ResumeRenderOptions):
+    """ATS-friendly typography, geometry, and length controls for DOCX export."""
+
+    font_name: str = Field(default="Calibri", min_length=1)
+    font_size: float = Field(default=10.5, ge=9.0, le=14.0)
+    heading_font_size: float = Field(default=11.5, ge=10.0, le=18.0)
+    name_font_size: float = Field(default=15.0, ge=12.0, le=24.0)
+    margin_top: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_bottom: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_left: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_right: float = Field(default=0.6, ge=0.4, le=1.5)
+    line_spacing: float = Field(default=1.0, ge=0.9, le=2.0)
+    bullet_indent: float = Field(default=0.375, ge=0.2, le=1.0)
+    max_projects: int | None = Field(default=None, ge=0, le=20)
+    max_experiences: int | None = Field(default=None, ge=0, le=20)
+    compact_spacing: bool = True
+    allow_overwrite: bool = False
+
+
 class RenderedResume(BaseModel):
     """In-memory deterministic resume rendering result."""
 

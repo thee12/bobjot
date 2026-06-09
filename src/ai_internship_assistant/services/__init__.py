@@ -18,6 +18,7 @@ from ai_internship_assistant.services.document_extraction import (
     UnsupportedDocumentFormatError,
     extract_text,
 )
+from ai_internship_assistant.services.docx_resume_renderer import DocxResumeRenderer
 from ai_internship_assistant.services.full_resume_optimizer import (
     FullResumeOptimizationError,
     FullResumeOptimizer,
@@ -109,6 +110,7 @@ from ai_internship_assistant.services.skill_gap_analyzer import (
 
 __all__ = [
     "DocumentTextExtractor",
+    "DocxResumeRenderer",
     "DEFAULT_GREENHOUSE_COMPANIES",
     "DEFAULT_LEVER_COMPANIES",
     "CorruptedDocumentError",

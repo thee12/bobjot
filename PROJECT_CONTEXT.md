@@ -357,6 +357,31 @@ and SHA-256 metadata. Rendered content can later be persisted as an export
 artifact or used as the canonical simple-text input for DOCX/PDF generation,
 without rerunning optimization.
 
+## ATS-Friendly DOCX Export
+
+`DocxResumeRenderer` is the Word-document implementation of the rendering
+boundary. It consumes a factual `Resume` or persisted `OptimizedResume` and
+produces a table-free, single-column `.docx` without invoking optimization,
+rewriting, scoring, LLMs, or external APIs.
+
+The first DOCX template is intentionally narrow and ATS-oriented. It uses
+explicit compact typography, margins, spacing, black section hierarchy, and
+real Word bullet-list paragraphs. It avoids tables, columns, images, icons,
+text boxes, decorative shapes, and important header/footer content. Document
+core author metadata is cleared during generation.
+
+DOCX length controls can limit rendered projects, experience entries, and
+bullets while recording warnings and preserving source objects. File output
+sanitizes names, creates private parent directories, rejects unsupported
+extensions, avoids silent overwrite, and returns hash and size metadata. The
+configured output directory defaults to `generated_resumes`.
+
+The exporter structurally validates generated content in tests by reopening
+files with `python-docx` and checking visible text, styles, margins, bullets,
+sections, tables, and images. Future templates and PDF export should implement
+the same renderer contract and must preserve this formatting-only safety
+boundary.
+
 ## Phase 1 Scope
 
 This scaffold includes:

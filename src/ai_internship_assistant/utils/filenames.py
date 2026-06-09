@@ -22,13 +22,16 @@ def generate_resume_filename(
     candidate_name: str | None,
     target_job_title: str | None = None,
     target_company: str | None = None,
+    *,
+    extension: str = ".md",
 ) -> str:
-    """Generate a readable safe Markdown filename from existing resume metadata."""
+    """Generate a readable safe resume filename from existing metadata."""
 
+    suffix = extension if extension.startswith(".") else f".{extension}"
     parts = [
         candidate_name or "candidate",
         target_job_title or "resume",
         *(value for value in [target_company] if value),
         "resume",
     ]
-    return sanitize_filename("_".join(parts) + ".md")
+    return sanitize_filename("_".join(parts) + suffix)

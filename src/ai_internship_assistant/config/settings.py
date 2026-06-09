@@ -32,6 +32,10 @@ class AppSettings(BaseSettings):
         default=True,
         description="Enable local persistence workflows.",
     )
+    resume_output_dir: str = Field(
+        default="generated_resumes",
+        description="Private local output directory for generated resume files.",
+    )
     log_level: str = Field(default="INFO", description="Application logging level.")
     openai_api_key: SecretStr | None = Field(
         default=None,

@@ -516,3 +516,40 @@ Markdown is the canonical simple text representation for previewing, debugging,
 comparison, and future export pipelines. Future DOCX, PDF, HTML, and plain-text
 renderers should implement the same `ResumeRenderer` contract without adding
 resume facts or changing optimization behavior.
+
+### ATS-Friendly DOCX Export
+
+`DocxResumeRenderer` exports a source `Resume` or stored `OptimizedResume`
+directly to a Microsoft Word `.docx` file without rerunning optimization. It is
+a formatting-only implementation of the same renderer boundary: existing
+contact facts, education, certifications, skills, projects, experience,
+additional sections, technologies, and bullets are preserved exactly.
+
+The default template is a compact ATS-safe Word layout derived from the
+`compact_reference_guide` document preset with deliberate resume overrides:
+
+- Calibri 10.5 pt body, 15 pt candidate name, and 11.5 pt section headings
+- 0.6-inch margins and compact paragraph spacing
+- plain black typography and simple uppercase headings
+- real Word bullet-list paragraphs
+- no tables, columns, images, icons, text boxes, shapes, or important
+  header/footer content
+
+`DocxRenderOptions` supports font and margin controls, compact spacing, section
+order, project and experience limits, bullet limits, source artifact IDs, and
+explicit overwrite permission. Trimming affects only the exported view,
+produces warnings, and never mutates the structured resume.
+
+`render_to_file()` creates parent directories, sanitizes filenames, creates
+collision suffixes for directory-based exports, rejects non-`.docx`
+destinations, calculates byte size and SHA-256 metadata, and refuses explicit
+file overwrites unless allowed. Generated files should remain in a private,
+configurable directory:
+
+```text
+AI_INTERNSHIP_ASSISTANT_RESUME_OUTPUT_DIR=generated_resumes
+```
+
+The DOCX exporter differs from Markdown rendering only in presentation and
+artifact format. Both render existing facts and share the same safety boundary.
+Perfect one-page enforcement and PDF conversion remain future work.

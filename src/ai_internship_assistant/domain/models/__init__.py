@@ -93,6 +93,7 @@ from ai_internship_assistant.domain.models.persistence import (
 from ai_internship_assistant.domain.models.preferences import UserPreferences
 from ai_internship_assistant.domain.models.rendering import (
     BulletStyle,
+    DocxRenderOptions,
     HeadingStyle,
     RenderedResume,
     RenderedResumeFile,
@@ -159,6 +160,7 @@ __all__ = [
     "ChangeType",
     "ConcernSeverity",
     "DisqualifyingConcern",
+    "DocxRenderOptions",
     "Education",
     "EmploymentType",
     "ExperienceLevel",
