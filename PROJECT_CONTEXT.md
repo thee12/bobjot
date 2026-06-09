@@ -189,6 +189,33 @@ legal or employment-eligibility decisions. The finite alias and related-skill
 maps are intentionally explainable and can be expanded without changing the
 stable report contract consumed by future ATS scoring and resume optimization.
 
+## Estimated ATS Match Scoring
+
+`ATSMatchScoringService` consumes `Resume`, `CandidateProfile`, `JobAnalysis`,
+and `SkillGapReport` and returns a separate `ATSMatchReport`. It measures the
+current resume's estimated textual and factual alignment with a specific job;
+it does not decide whether the job itself is a good target. That remains the
+responsibility of `JobFitScoringService`.
+
+The estimated ATS score is deterministic and versioned. Configurable weights
+cover required and preferred skills, ATS keywords, certifications, role,
+experience level, and education. Explicit skill-gap concerns apply transparent
+penalties after weighted scoring. Missing component data receives a neutral
+score and a warning instead of a misleading zero.
+
+Keyword matching uses the same conservative alias vocabulary as skill-gap
+analysis and scans factual resume/profile evidence across skills, projects,
+experience, certifications, education, target roles, and profile terms.
+Section scores show where keywords are currently supported. Optimization
+guidance respects `safe_to_add_to_resume`; unsupported keywords are never
+recommended for direct addition.
+
+`ATSMatchReport` is an internal heuristic and must never be described as a
+guaranteed ATS screening result. Real applicant tracking systems vary and use
+proprietary behavior. Future resume optimization can use the report to choose
+factual emphasis opportunities and identify unsafe missing terms without
+changing the scoring contract.
+
 ## Phase 1 Scope
 
 This scaffold includes:

@@ -80,6 +80,8 @@ Resume PDF/DOCX
   -> optional OpenAIJobDescriptionAnalyzer / HybridJobDescriptionAnalyzer
   -> SkillGapAnalyzer.analyze(CandidateProfile, JobAnalysis)
   -> SkillGapReport(...)
+  -> ATSMatchScoringService.score(Resume, CandidateProfile, JobAnalysis, SkillGapReport)
+  -> ATSMatchReport(...)
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -286,3 +288,44 @@ normalized matches identify existing facts that may be emphasized; related
 opportunities explain cautious wording; gaps identify terms that must not be
 claimed. Current matching uses finite alias and relationship dictionaries and
 cannot understand every semantic relationship.
+
+### Estimated ATS Match Scoring
+
+`ATSMatchScoringService` estimates how well the candidate's current factual
+resume and profile align with one structured job description. It produces an
+explainable `ATSMatchReport` with component scores, keyword coverage,
+required/preferred skill coverage, certification coverage, role, experience,
+education alignment, resume-section scores, concern penalties, optimization
+priority, and safety-aware guidance.
+
+This is an internal deterministic heuristic, not a guarantee of success in any
+real applicant tracking system. Proprietary ATS products use different,
+undisclosed ranking and filtering behavior.
+
+Default component weights are centralized in `ATSMatchScoringConfig`:
+
+- required skill coverage: 30%
+- ATS keyword coverage: 25%
+- role alignment: 15%
+- preferred skill coverage: 10%
+- certification coverage: 7.5%
+- experience-level alignment: 7.5%
+- education alignment: 5%
+
+Concern penalties are applied after weighted scoring. Estimated recommendation
+levels are `EXCELLENT_MATCH` (90+), `STRONG_MATCH` (80+), `GOOD_MATCH` (70+),
+`POSSIBLE_MATCH` (60+), `WEAK_MATCH` (40+), and `NOT_RECOMMENDED` (below 40).
+Optimization priority separately estimates whether factual tailoring is likely
+to be useful.
+
+The ATS report respects the skill-gap safety contract. Missing skills with
+`safe_to_add_to_resume=false` remain missing and guidance explicitly says not
+to add them without actual evidence. Section-level opportunities may suggest
+where existing facts could be emphasized, but this phase does not rewrite the
+resume.
+
+Job fit ranking and ATS match scoring answer different questions:
+
+- Job fit ranking: should the candidate consider this job?
+- Estimated ATS match scoring: how well does the current resume align with this
+  job description?

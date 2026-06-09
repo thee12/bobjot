@@ -1,5 +1,10 @@
 """Service-layer entrypoints for application workflows."""
 
+from ai_internship_assistant.services.ats_scoring import (
+    ATSMatchScoringConfig,
+    ATSMatchScoringError,
+    ATSMatchScoringService,
+)
 from ai_internship_assistant.services.candidate_profile_generator import (
     CandidateProfileGenerationError,
     CandidateProfileGenerator,
@@ -82,6 +87,9 @@ __all__ = [
     "CandidateProfileGenerationError",
     "CandidateProfileGenerator",
     "CandidateProfilePipeline",
+    "ATSMatchScoringConfig",
+    "ATSMatchScoringError",
+    "ATSMatchScoringService",
     "DocumentExtractionError",
     "EmptyJobDescriptionError",
     "EmptyResumeTextError",
