@@ -24,6 +24,14 @@ class AppSettings(BaseSettings):
         default="sqlite:///data/applications.db",
         description="Database connection URL for application tracking.",
     )
+    sqlite_file_path: str = Field(
+        default="data/applications.db",
+        description="Default local SQLite path when a direct path is useful.",
+    )
+    enable_persistence: bool = Field(
+        default=True,
+        description="Enable local persistence workflows.",
+    )
     log_level: str = Field(default="INFO", description="Application logging level.")
     openai_api_key: SecretStr | None = Field(
         default=None,
@@ -57,4 +65,19 @@ class AppSettings(BaseSettings):
     enable_hybrid_analysis: bool = Field(
         default=False,
         description="Enable rule-based plus LLM job-description analysis.",
+    )
+    bullet_rewrite_model: str = Field(
+        default="gpt-4.1-mini",
+        description="OpenAI model used for structured single-bullet rewriting.",
+    )
+    bullet_rewrite_temperature: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=2.0,
+        description="Sampling temperature for bullet rewriting.",
+    )
+    bullet_rewrite_timeout_seconds: float = Field(
+        default=30.0,
+        gt=0.0,
+        description="OpenAI bullet-rewrite request timeout.",
     )

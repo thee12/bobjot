@@ -18,6 +18,10 @@ from ai_internship_assistant.services.document_extraction import (
     UnsupportedDocumentFormatError,
     extract_text,
 )
+from ai_internship_assistant.services.full_resume_optimizer import (
+    FullResumeOptimizationError,
+    FullResumeOptimizer,
+)
 from ai_internship_assistant.services.greenhouse import (
     DEFAULT_GREENHOUSE_COMPANIES,
     GreenhouseCompanyConfig,
@@ -61,6 +65,25 @@ from ai_internship_assistant.services.llm_job_description_analyzer import (
     MissingJobAnalysisAPIKeyError,
     OpenAIJobDescriptionAnalyzer,
 )
+from ai_internship_assistant.services.resume_bullet_rewriter import (
+    BulletRewriteSafetyValidator,
+    OpenAIResumeBulletRewriter,
+    ResumeBulletRewriter,
+    RuleBasedResumeBulletRewriter,
+    build_bullet_rewrite_request,
+)
+from ai_internship_assistant.services.resume_generator import (
+    MarkdownResumeRenderer,
+    ResumeOutputFileExistsError,
+    ResumeOutputWriteError,
+    ResumeRenderer,
+    ResumeRenderingError,
+    UnsupportedResumeFormatError,
+)
+from ai_internship_assistant.services.resume_optimizer import (
+    ResumeOptimizationPlanner,
+    ResumeOptimizationPlanningError,
+)
 from ai_internship_assistant.services.resume_parser import (
     EmptyResumeTextError,
     LLMResumeParsingError,
@@ -72,6 +95,11 @@ from ai_internship_assistant.services.resume_parser import (
 from ai_internship_assistant.services.resume_validation import (
     ResumeValidationError,
     ResumeValidator,
+)
+from ai_internship_assistant.services.resume_versioning_service import (
+    InvalidResumeVersionRelationshipError,
+    ResumeVersionComparisonService,
+    ResumeVersioningService,
 )
 from ai_internship_assistant.services.skill_gap_analyzer import (
     SkillGapAnalysisConfig,
@@ -110,24 +138,42 @@ __all__ = [
     "GreenhouseCompanyConfig",
     "GreenhouseHttpClient",
     "GreenhouseJobSource",
+    "FullResumeOptimizationError",
+    "FullResumeOptimizer",
     "JobSearchService",
     "JobSource",
     "JobSourceSearchError",
     "MalformedLLMResponseError",
     "MalformedJobAnalysisResponseError",
+    "MarkdownResumeRenderer",
     "MissingJobAnalysisAPIKeyError",
     "MockJobSource",
     "OpenAIJobDescriptionAnalyzer",
     "OpenAIResumeParser",
     "ProfileGenerator",
     "ResumeParser",
+    "ResumeRenderer",
+    "ResumeRenderingError",
     "ResumeParsingError",
+    "ResumeOptimizationPlanner",
+    "ResumeOptimizationPlanningError",
+    "ResumeOutputFileExistsError",
+    "ResumeOutputWriteError",
+    "BulletRewriteSafetyValidator",
+    "OpenAIResumeBulletRewriter",
+    "ResumeBulletRewriter",
+    "RuleBasedResumeBulletRewriter",
+    "build_bullet_rewrite_request",
     "ResumeValidationError",
+    "ResumeVersionComparisonService",
+    "ResumeVersioningService",
+    "InvalidResumeVersionRelationshipError",
     "RuleBasedJobDescriptionAnalyzer",
     "SkillGapAnalysisConfig",
     "SkillGapAnalysisError",
     "SkillGapAnalyzer",
     "ResumeValidator",
     "UnsupportedDocumentFormatError",
+    "UnsupportedResumeFormatError",
     "extract_text",
 ]

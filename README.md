@@ -82,6 +82,16 @@ Resume PDF/DOCX
   -> SkillGapReport(...)
   -> ATSMatchScoringService.score(Resume, CandidateProfile, JobAnalysis, SkillGapReport)
   -> ATSMatchReport(...)
+  -> ResumeOptimizationPlanner.create_plan(...)
+  -> ResumeOptimizationPlan(...)
+  -> OpenAIResumeBulletRewriter.rewrite(BulletRewriteRequest)
+  -> BulletRewriteResult(...)
+  -> FullResumeOptimizer.optimize(ResumeOptimizationRequest)
+  -> OptimizedResumeResult(...)
+  -> ResumeVersioningService.save_optimized_resume(...)
+  -> StoredResumeVersion(...)
+  -> MarkdownResumeRenderer.render(...)
+  -> RenderedResume(...)
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -329,3 +339,180 @@ Job fit ranking and ATS match scoring answer different questions:
 - Job fit ranking: should the candidate consider this job?
 - Estimated ATS match scoring: how well does the current resume align with this
   job description?
+
+### Resume Optimization Planning
+
+`ResumeOptimizationPlanner` creates a strict, deterministic safety contract
+before any resume rewriting occurs. It consumes the original `Resume`,
+`CandidateProfile`, `JobAnalysis`, `SkillGapReport`, and `ATSMatchReport`, then
+returns a separate `ResumeOptimizationPlan`. It does not rewrite bullets,
+change resume content, or call an LLM.
+
+Planning happens before rewriting so a future optimizer receives explicit
+permissions and prohibitions rather than an unconstrained instruction to
+"tailor this resume." The plan identifies:
+
+- sections and existing skills to reorder or emphasize
+- existing projects and experience entries to feature
+- keywords supported by direct resume evidence
+- related terms that require cautious wording
+- unsupported keywords that must not be added
+- forbidden claims, factuality risks, and mitigations
+- learning recommendations for missing skills
+- a conservative, non-guaranteed score-improvement range
+
+Keyword safety statuses are:
+
+- `SAFE_TO_INCLUDE`: direct factual evidence supports the keyword.
+- `SAFE_TO_EMPHASIZE`: existing wording or evidence supports cautious emphasis.
+- `RELATED_ONLY`: related evidence exists, but the exact keyword is not a direct claim.
+- `NOT_SAFE_TO_INCLUDE`: no supporting candidate evidence exists.
+- `LEARNING_RECOMMENDATION_ONLY`: keep the term out of the resume until genuine
+  experience or a completed project supports it.
+
+Forbidden claims make unsupported language explicit. For example, when Splunk
+is missing, the plan may prohibit claims such as "Used Splunk" or "Built
+production solutions with Splunk." Future rewriting modules must treat
+`ResumeOptimizationPlan` as an allowlist and denylist: they may not add facts,
+technologies, certifications, metrics, projects, employers, dates, or
+experience outside the plan and source resume.
+
+Deterministic planning has finite keyword and phrase-awareness. A human should
+review cautious emphasis recommendations before generating a final resume.
+
+### Safe Resume Bullet Rewriting
+
+Bullet rewriting is isolated to one bullet at a time. A
+`BulletRewriteRequest` contains the original bullet, parent section/item,
+candidate evidence, target job, and the optimization plan's safe keywords,
+related keywords, unsafe keywords, and forbidden claims. The versioned
+`resume-bullet-rewrite-v1` prompt sends only that constrained bullet-level
+context to OpenAI structured outputs.
+
+`OpenAIResumeBulletRewriter` never trusts provider output directly. Every
+proposed bullet passes through `BulletRewriteSafetyValidator`, which rejects:
+
+- unsafe keywords or forbidden claims
+- technologies absent from allowed evidence
+- new metrics absent from the original bullet or evidence
+- unsupported production, enterprise, SOC, or security experience scope
+- major meaning changes, vague output, empty output, or excessive length
+
+Rejected output returns the exact original bullet with structured safety
+violations and `FALLBACK_ORIGINAL` provenance. Provider failures, timeouts, and
+malformed responses use `RuleBasedResumeBulletRewriter`, which may only improve
+capitalization or punctuation and never introduces keywords or claims.
+
+Safe and related keywords are permissions, not instructions to stuff keywords.
+Related terms may only appear when candidate evidence supports the wording.
+Existing metrics may be preserved; metrics may never be created. This phase
+does not rewrite full sections in one shot.
+
+### Full Resume Optimization
+
+`FullResumeOptimizer` assembles a complete structured `OptimizedResume` from the
+original resume, candidate and job evidence, skill-gap and ATS reports, the
+optimization plan, and an injected `ResumeBulletRewriter`. It never sends the
+entire resume to an LLM. Deterministic orchestration handles section, skill,
+project, and experience ordering; configurable limits handle approximate
+one-page trimming; only individual bullets cross the rewriter boundary.
+
+The optimization plan is a mandatory safety contract. Planned skills absent
+from the source are blocked, unsupported and learning-only keywords remain
+missing, and certifications, technologies, education, employers, roles, and
+dates are copied from the original resume. Every proposed bullet is locally
+validated again even if the rewriter reports it as safe. One failed or unsafe
+bullet preserves its original text and cannot fail the whole resume.
+
+Every decision produces a `ResumeChange` with the original and new values,
+reason, evidence, and safety status. `ResumeOptimizationSafetyReport` records
+blocked changes and any final unsafe keywords, forbidden claims, invented
+technologies, or invented metrics. Strict mode returns an original-content
+`OptimizedResume` when any unsafe change is attempted. Non-strict mode keeps
+safe changes while rejecting unsafe ones.
+
+The result includes a conservative estimated improvement range scaled from the
+planner's estimate and the safe changes actually completed. It is not a
+guaranteed ATS score. `OptimizedResume` is a rendering-neutral persistence
+contract; DOCX/PDF templates, version storage, and rescoring remain future
+work.
+
+### Resume Versioning And Persistence
+
+Resume persistence treats the master resume and every tailored resume as
+separate versioned artifacts. `ResumeVersioningService.save_master_resume()`
+stores parsed structured resume JSON and optional source-file metadata, never
+the raw PDF or DOCX bytes. Duplicate master sources are detected with normalized
+SHA-256 hashes. Saving an optimized result always creates a new immutable
+version and never overwrites the master or an earlier tailored version.
+
+SQLite is the Phase 5D default, implemented through SQLAlchemy repositories so
+services do not depend on database-specific SQL. The migration-friendly schema
+contains:
+
+- `master_resumes`: source-of-truth parsed resumes and non-binary upload metadata
+- `resume_versions`: optimized resume, plan, skill-gap report, ATS report,
+  safety report, change log, score estimates, and target-job linkage
+- `jobs`: minimal standardized job and optional analysis records
+
+Complex Pydantic contracts are serialized consistently as JSON and reconstructed
+as typed domain models. Each artifact records a model schema version and emits a
+compatibility warning when it differs from the current version. Lightweight
+version summaries avoid deserializing full resume contents for list views.
+
+Readable version names are generated from target role and company. Re-optimizing
+for the same job creates a new suffix such as `v2`. Only metadata notes may be
+updated; optimized resume content remains immutable. A lightweight comparison
+service currently compares score estimates and change-type counts, leaving
+semantic content diffing to a future UI phase.
+
+Configure persistence with:
+
+```text
+AI_INTERNSHIP_ASSISTANT_DATABASE_URL=sqlite:///data/applications.db
+AI_INTERNSHIP_ASSISTANT_SQLITE_FILE_PATH=data/applications.db
+AI_INTERNSHIP_ASSISTANT_ENABLE_PERSISTENCE=true
+```
+
+Persistence tests use isolated in-memory SQLite databases:
+
+```bash
+pytest tests/test_resume_versioning.py
+```
+
+Production deployment should migrate the SQLAlchemy schema to PostgreSQL and
+add encryption at rest, access controls, secure deletion, authentication, and
+audit logs. Resume contents and PII must never be written to application logs.
+
+### Markdown Resume Rendering
+
+`MarkdownResumeRenderer` converts either a source `Resume` or an
+`OptimizedResume` into deterministic, human-readable Markdown. Rendering is a
+presentation-only stage: it does not optimize, rewrite, infer, score, or add
+content. Existing section order, bullets, technologies, certifications,
+education, contact facts, and additional sections are preserved.
+
+The default output is intentionally simple and ATS-friendly:
+
+- plain contact values separated by pipes
+- simple Markdown headings
+- dash bullets
+- no tables, columns, icons, images, nested bullets, or decorative separators
+- plain URLs rather than Markdown links
+
+`ResumeRenderOptions` controls section visibility, section order, bullet limits,
+heading and bullet styles, metadata comments, and source artifact IDs. Strict
+ATS mode forces dash bullets and can be paired with `ATS_SIMPLE` headings for
+plain uppercase section labels. Missing data is omitted rather than replaced
+with placeholders. Bullet limits only affect the rendering and produce
+warnings; source models are never mutated.
+
+`render_to_file()` writes UTF-8 Markdown, creates parent directories, sanitizes
+filenames, generates readable filenames when given an output directory, records
+a SHA-256 content hash, and refuses to overwrite an existing file unless
+explicitly allowed. The Markdown renderer rejects non-`.md` file extensions.
+
+Markdown is the canonical simple text representation for previewing, debugging,
+comparison, and future export pipelines. Future DOCX, PDF, HTML, and plain-text
+renderers should implement the same `ResumeRenderer` contract without adding
+resume facts or changing optimization behavior.
