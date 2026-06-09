@@ -66,6 +66,10 @@ from ai_internship_assistant.services.llm_job_description_analyzer import (
     MissingJobAnalysisAPIKeyError,
     OpenAIJobDescriptionAnalyzer,
 )
+from ai_internship_assistant.services.pdf_resume_renderer import (
+    PdfRenderingError,
+    PdfResumeRenderer,
+)
 from ai_internship_assistant.services.resume_bullet_rewriter import (
     BulletRewriteSafetyValidator,
     OpenAIResumeBulletRewriter,
@@ -152,6 +156,8 @@ __all__ = [
     "MockJobSource",
     "OpenAIJobDescriptionAnalyzer",
     "OpenAIResumeParser",
+    "PdfRenderingError",
+    "PdfResumeRenderer",
     "ProfileGenerator",
     "ResumeParser",
     "ResumeRenderer",

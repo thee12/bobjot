@@ -92,6 +92,8 @@ Resume PDF/DOCX
   -> StoredResumeVersion(...)
   -> MarkdownResumeRenderer.render(...)
   -> RenderedResume(...)
+  -> DocxResumeRenderer.render_to_file(...) / PdfResumeRenderer.render_to_file(...)
+  -> ATS-friendly resume artifact
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -513,9 +515,9 @@ a SHA-256 content hash, and refuses to overwrite an existing file unless
 explicitly allowed. The Markdown renderer rejects non-`.md` file extensions.
 
 Markdown is the canonical simple text representation for previewing, debugging,
-comparison, and future export pipelines. Future DOCX, PDF, HTML, and plain-text
-renderers should implement the same `ResumeRenderer` contract without adding
-resume facts or changing optimization behavior.
+comparison, and export pipelines. DOCX and PDF renderers implement the same
+formatting-only safety boundary without adding resume facts or changing
+optimization behavior.
 
 ### ATS-Friendly DOCX Export
 
@@ -552,4 +554,40 @@ AI_INTERNSHIP_ASSISTANT_RESUME_OUTPUT_DIR=generated_resumes
 
 The DOCX exporter differs from Markdown rendering only in presentation and
 artifact format. Both render existing facts and share the same safety boundary.
-Perfect one-page enforcement and PDF conversion remain future work.
+Perfect one-page enforcement remains future work.
+
+### ATS-Friendly PDF Export
+
+`PdfResumeRenderer` exports a source `Resume` or stored `OptimizedResume`
+directly to a selectable-text `.pdf` without rerunning optimization or calling
+an LLM. It uses ReportLab for direct text-based generation and shares the
+canonical section extraction and ordering behavior of `MarkdownResumeRenderer`.
+
+The default PDF uses Letter paper, Helvetica 10.5 pt body text, compact
+0.6-inch margins, plain uppercase headings, simple bullets, and a single-column
+layout. It contains no images, tables, icons, text boxes, columns, remote fonts,
+decorative graphics, hidden text, or important header/footer content.
+Supported content includes contact facts, summary, education, certifications,
+grouped skills, projects, experience, technologies, bullets, and generic
+additional sections.
+
+`PdfRenderOptions` controls standard font choice, typography, margins, line
+spacing, page size, compact mode, section and bullet limits, source artifact
+IDs, extractable-text validation, and explicit overwrite permission. Length
+limits affect only the exported view and produce warnings. The exporter records
+page count and warns when output exceeds one page; it never silently removes a
+section or mutates the source resume.
+
+`render_to_file()` creates private parent directories, sanitizes filenames,
+creates collision suffixes for directory exports, rejects non-`.pdf`
+destinations, sets safe document metadata, calculates byte size and SHA-256,
+and optionally reopens the result with `pdfplumber` to verify key text is
+extractable. Generated files use the same configurable private output location:
+
+```text
+AI_INTERNSHIP_ASSISTANT_RESUME_OUTPUT_DIR=generated_resumes
+```
+
+PDF text extraction varies across applicant tracking systems. Prefer DOCX for
+ATS uploads when the employer accepts it; use PDF when the employer specifically
+requests PDF or when preserving a stable visual artifact matters.

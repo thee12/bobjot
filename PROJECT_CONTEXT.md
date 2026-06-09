@@ -378,9 +378,34 @@ configured output directory defaults to `generated_resumes`.
 
 The exporter structurally validates generated content in tests by reopening
 files with `python-docx` and checking visible text, styles, margins, bullets,
-sections, tables, and images. Future templates and PDF export should implement
-the same renderer contract and must preserve this formatting-only safety
-boundary.
+sections, tables, and images. Future templates must preserve this
+formatting-only safety boundary.
+
+## ATS-Friendly PDF Export
+
+`PdfResumeRenderer` is the selectable-text PDF implementation of the rendering
+boundary. It accepts a factual `Resume` or persisted `OptimizedResume`, reuses
+the canonical Markdown renderer's section extraction and ordering, and creates
+a simple single-column PDF with ReportLab. It never invokes optimization,
+rewriting, scoring, LLMs, external resources, Microsoft Word, or LibreOffice.
+
+PDF defaults prioritize parsing reliability and one-page friendliness:
+standard Helvetica typography, compact spacing, Letter paper, plain uppercase
+headings, simple bullets, no images, no tables, no columns, and no important
+header/footer content. `PdfRenderOptions` provides bounded typography, margin,
+page-size, compact-mode, section, entry, and bullet controls. Trimming changes
+only the rendered view, emits warnings, and never mutates source models.
+
+File output shares the existing private-directory, filename-sanitization,
+collision, and overwrite protections. It returns size, SHA-256, and detected
+page count, sets only safe public resume metadata, warns for multi-page output,
+and optionally validates representative extractable text with `pdfplumber`.
+Tests verify deterministic bytes, selectable text, metadata, absent images and
+complex layout objects, factual content preservation, and source immutability.
+
+PDF parsing behavior differs among applicant tracking systems. DOCX remains the
+recommended upload format when accepted; PDF should be used when specifically
+requested or when a stable visual document is needed.
 
 ## Phase 1 Scope
 

@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -74,6 +75,27 @@ class DocxRenderOptions(ResumeRenderOptions):
     allow_overwrite: bool = False
 
 
+class PdfRenderOptions(ResumeRenderOptions):
+    """ATS-friendly typography, geometry, and length controls for PDF export."""
+
+    font_name: Literal["Helvetica", "Times-Roman", "Courier"] = "Helvetica"
+    font_size: float = Field(default=10.5, ge=9.0, le=14.0)
+    heading_font_size: float = Field(default=11.5, ge=10.0, le=18.0)
+    name_font_size: float = Field(default=15.0, ge=12.0, le=24.0)
+    margin_top: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_bottom: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_left: float = Field(default=0.6, ge=0.4, le=1.5)
+    margin_right: float = Field(default=0.6, ge=0.4, le=1.5)
+    line_spacing: float = Field(default=1.05, ge=0.9, le=2.0)
+    bullet_indent: float = Field(default=0.25, ge=0.1, le=1.0)
+    max_projects: int | None = Field(default=None, ge=0, le=20)
+    max_experiences: int | None = Field(default=None, ge=0, le=20)
+    page_size: Literal["Letter", "A4"] = "Letter"
+    compact_mode: bool = True
+    allow_overwrite: bool = False
+    validate_extractable_text: bool = True
+
+
 class RenderedResume(BaseModel):
     """In-memory deterministic resume rendering result."""
 
@@ -92,7 +114,7 @@ class RenderedResume(BaseModel):
 
 
 class RenderedResumeFile(BaseModel):
-    """Metadata for one UTF-8 resume rendering written to disk."""
+    """Metadata for one rendered resume artifact written to disk."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -101,4 +123,5 @@ class RenderedResumeFile(BaseModel):
     byte_size: int = Field(ge=0)
     content_hash: str
     rendered_resume: RenderedResume
+    page_count: int | None = Field(default=None, ge=1)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
