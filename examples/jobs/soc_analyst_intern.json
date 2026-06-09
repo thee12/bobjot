@@ -1,0 +1,28 @@
+{
+  "id": "example-soc-analyst-intern",
+  "source": "manual",
+  "source_name": "Example",
+  "source_url": "https://example.com/jobs/soc-analyst-intern",
+  "apply_url": "https://example.com/jobs/soc-analyst-intern/apply",
+  "title": "SOC Analyst Intern",
+  "company": "Example Security Company",
+  "location": "Raleigh, NC",
+  "employment_type": "internship",
+  "seniority": "internship",
+  "work_arrangement": "hybrid",
+  "description": "Support security monitoring and incident-response workflows.",
+  "responsibilities": [
+    "Review security alerts and document findings."
+  ],
+  "requirements": [
+    "Coursework or projects involving Python, Linux, or networking."
+  ],
+  "preferred_qualifications": [],
+  "technologies": [
+    "Python",
+    "Linux",
+    "Networking"
+  ],
+  "certifications": [],
+  "raw_data": {}
+}

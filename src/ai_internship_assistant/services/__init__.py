@@ -1,5 +1,10 @@
 """Service-layer entrypoints for application workflows."""
 
+from ai_internship_assistant.services.application_tracking_service import (
+    ApplicationTrackingError,
+    ApplicationTrackingService,
+    InvalidApplicationNoteError,
+)
 from ai_internship_assistant.services.ats_scoring import (
     ATSMatchScoringConfig,
     ATSMatchScoringError,
@@ -124,6 +129,8 @@ __all__ = [
     "ATSMatchScoringConfig",
     "ATSMatchScoringError",
     "ATSMatchScoringService",
+    "ApplicationTrackingError",
+    "ApplicationTrackingService",
     "DocumentExtractionError",
     "EmptyJobDescriptionError",
     "EmptyResumeTextError",
@@ -176,6 +183,7 @@ __all__ = [
     "ResumeVersionComparisonService",
     "ResumeVersioningService",
     "InvalidResumeVersionRelationshipError",
+    "InvalidApplicationNoteError",
     "RuleBasedJobDescriptionAnalyzer",
     "SkillGapAnalysisConfig",
     "SkillGapAnalysisError",

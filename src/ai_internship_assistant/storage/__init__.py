@@ -1,5 +1,11 @@
 """Persistence adapters and repository entrypoints."""
 
+from ai_internship_assistant.storage.application_repositories import (
+    ApplicationNotFoundError,
+    ApplicationRepository,
+    SavedJobNotFoundError,
+    SavedJobRepository,
+)
 from ai_internship_assistant.storage.database import (
     Database,
     DatabaseUnavailableError,
@@ -23,6 +29,8 @@ from ai_internship_assistant.storage.serialization import (
 
 __all__ = [
     "ArtifactSerializationError",
+    "ApplicationNotFoundError",
+    "ApplicationRepository",
     "CorruptedArtifactError",
     "Database",
     "DatabaseUnavailableError",
@@ -34,6 +42,8 @@ __all__ = [
     "PersistenceError",
     "ResumeVersionNotFoundError",
     "ResumeVersionRepository",
+    "SavedJobNotFoundError",
+    "SavedJobRepository",
     "normalized_text_hash",
     "structured_content_hash",
 ]

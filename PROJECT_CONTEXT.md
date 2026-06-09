@@ -13,6 +13,30 @@ The project uses a modular `src` layout with clear boundaries:
 - Storage modules will isolate database concerns from business workflows.
 - Configuration is centralized and typed.
 
+## FastAPI Backend Architecture
+
+`ai_internship_assistant.api.main:create_app` is the HTTP composition root. It
+builds or accepts an application-scoped `ApiContainer`, registers centralized
+domain-error mapping, and mounts separate health, resume, job, optimization,
+export, and application routers. Tests inject isolated containers and parser
+implementations without patching global state.
+
+Routers validate HTTP input and delegate multi-stage work to existing services
+through `ApiWorkflowService`. The default local container is deterministic: it
+uses `MockJobSource`, rule-based job analysis, and the rule-based resume bullet
+rewriter. Long-running search and optimization endpoints are synchronous for
+now and are marked as future background-task boundaries.
+
+The API protects sensitive artifacts by limiting uploads to signature-checked
+PDF/DOCX files, cleaning up temporary files, registering exports behind opaque
+download IDs, enforcing the configured export root, and excluding provider
+`raw_data` from ordinary saved-job responses. It never logs or returns resume
+file contents, API keys, prompts, arbitrary file paths, or stack traces.
+
+The backend currently has no authentication or tenant isolation. It is intended
+for trusted local development only until authentication, authorization, and
+hosted-deployment controls are implemented.
+
 ## Candidate Profile Architecture
 
 `CandidateProfile` is the normalized representation intended for most future
@@ -331,6 +355,63 @@ Raw uploaded PDF/DOCX files are not persisted. Production use must add
 encryption at rest, access controls, secure deletion, user authentication, and
 audit logs, and must never log full resume data or PII.
 
+## Application Tracking
+
+`ApplicationTrackingService` extends the existing persistence boundary into a
+lightweight application CRM. Saved jobs and applications are separate:
+`saved_jobs` retains a normalized, deduplicated job snapshot and optional
+analysis/score artifacts, while `job_applications` records user intent,
+pipeline status, optional resume-version linkage, milestone timestamps, and
+follow-up dates.
+
+`SavedJobRepository` reuses `JobNormalizationService` instead of maintaining a
+second URL or fingerprint implementation. Duplicate provider IDs, normalized
+apply/source URLs, or company/title/location fingerprints refresh
+`last_seen_at`; explicit duplicate creation remains possible. Original
+`JobPosting`, optional `JobAnalysis`, and optional `ATSMatchReport` are retained
+as typed serialized snapshots.
+
+`ApplicationRepository` owns atomic status changes and chronological
+`application_status_history`. Status transitions are permissive at this phase,
+but milestone timestamps are set only once. `application_notes` is append-only.
+Resume-version foreign keys are nullable with `SET NULL`, preserving application
+history if a version is removed in a future migration.
+
+Application list queries return lightweight joined summaries without loading
+resume JSON. Filters support status, company, role keyword, source, applied
+date range, due follow-ups, interview activity, and resume version. Due
+follow-ups require a date on or before the query date and exclude rejected,
+offered, withdrawn, and closed applications.
+
+This phase deliberately excludes notifications, email/calendar integration,
+auto-apply, UI, and analytics. Application notes, outcomes, job snapshots, and
+resume links are sensitive career data and must not be written to logs or
+public storage.
+
+## Application Tracker CLI
+
+The `jobbot` Typer entrypoint is a developer-facing adapter over
+`ApplicationTrackingService`. CLI commands never access SQLAlchemy rows or
+repositories directly. This preserves one reusable business-logic boundary for
+future FastAPI and frontend adapters.
+
+The CLI supports validated JSON job import, saved-job listing and inspection,
+application creation and listing, status changes, append-only notes, follow-up
+dates, due-follow-up queries, status history, and resume-version linkage.
+Default output is concise human-readable text; key commands support serialized
+JSON output for scripting. Full job snapshots and private notes appear only
+when a user explicitly requests detailed or JSON output.
+
+Database configuration precedence is global `--db-url`, `JOBBOT_DATABASE_URL`,
+the existing typed application setting, then the development SQLite default.
+SQLite parent directories and schema are initialized at command startup.
+Expected user errors are converted into clear CLI messages without tracebacks.
+
+Tests invoke separate commands against isolated temporary SQLite files,
+exercising the same persisted state a developer sees across terminal commands.
+The CLI performs no network, LLM, scraping, browser, email, calendar,
+notification, or auto-apply work.
+
 ## Markdown Resume Rendering
 
 `ResumeRenderer` is the provider-neutral presentation boundary for future
@@ -407,26 +488,22 @@ PDF parsing behavior differs among applicant tracking systems. DOCX remains the
 recommended upload format when accepted; PDF should be used when specifically
 requested or when a stable visual document is needed.
 
-## Phase 1 Scope
+## Current Scope
 
-This scaffold includes:
+The project includes:
 
 - package structure
 - project metadata
 - dependency declarations
 - typed Pydantic domain models
-- placeholder modules with future responsibilities documented
-- test package skeleton
+- service-layer resume, job, analysis, optimization, and rendering workflows
+- SQLite persistence and application tracking
+- CLI and FastAPI adapters
+- isolated unit and API integration tests
 
-This scaffold intentionally excludes:
-
-- resume parsing logic
-- job scraping logic
-- LLM prompts
-- FastAPI routes
-- optimization logic
-- ATS scoring algorithms
-- database schema migrations
+The current backend intentionally excludes authentication, frontend UI,
+background workers, cloud deployment, email/calendar integration,
+browser automation, and auto-apply behavior.
 
 ## AI Safety Constraint
 

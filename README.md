@@ -2,7 +2,9 @@
 
 AI Internship Application Assistant is an AI-assisted resume tailoring and job discovery platform for internships and entry-level roles.
 
-The Phase 1 scaffold defines the project architecture only. It does not implement scraping, LLM prompts, API endpoints, resume optimization, or generation logic.
+The project now includes a local FastAPI backend over the typed service and
+persistence layers. It supports resume ingestion, deterministic local job
+search, analysis, optimization, export, and application tracking.
 
 ## Goals
 
@@ -33,11 +35,13 @@ It may only reorder, rewrite, emphasize, align keywords, and improve readability
 
 ```text
 src/ai_internship_assistant/
+  api/                 FastAPI app factory, schemas, dependencies, and routers.
+  cli/                 Developer-facing application tracker commands.
   config/              Runtime settings and environment configuration.
   domain/models/       Core Pydantic models shared across the system.
-  services/            Future service-layer modules for parsing, analysis, scoring, and generation.
-  storage/             Future database and repository abstractions.
-tests/                 Test suite skeleton.
+  services/            Parsing, analysis, scoring, optimization, and rendering.
+  storage/             SQLAlchemy database and repository abstractions.
+tests/                 Unit and API integration tests.
 ```
 
 ## Setup
@@ -46,6 +50,87 @@ tests/                 Test suite skeleton.
 python -m venv .venv
 .venv\Scripts\activate
 python -m pip install -r requirements.txt
+```
+
+## FastAPI Backend
+
+Run the local development API:
+
+```bash
+uvicorn ai_internship_assistant.api.main:app --reload
+```
+
+OpenAPI documentation is available at `http://localhost:8000/docs`. This phase
+has no authentication or user isolation and is intended only for trusted local
+development. Do not expose it to the public internet or use it as a multi-user
+service.
+
+Supported API environment variables:
+
+```text
+JOBBOT_DATABASE_URL=sqlite:///data/applications.db
+JOBBOT_EXPORT_DIR=generated_resumes
+JOBBOT_ENABLE_LLM=false
+JOBBOT_OPENAI_MODEL=gpt-4.1-mini
+JOBBOT_ENV=local
+OPENAI_API_KEY=
+```
+
+The default API container uses `MockJobSource`, rule-based job analysis, and a
+rule-based bullet rewriter, so job search and optimization do not call external
+providers. Resume uploads use an injected parser in tests; setting
+`JOBBOT_ENABLE_LLM=true` with `OPENAI_API_KEY` configures the existing OpenAI
+structured-output resume parser.
+
+Upload a resume:
+
+```bash
+curl -X POST http://localhost:8000/resumes/upload \
+  -F "file=@resume.pdf" \
+  -F "parse_with_llm=true"
+```
+
+Search and optionally save ranked mock jobs:
+
+```bash
+curl -X POST http://localhost:8000/jobs/search \
+  -H "Content-Type: application/json" \
+  -d '{"resume_id":"resume_123","max_results":10,"save_results":true}'
+```
+
+Run safe optimization and export a stored version:
+
+```bash
+curl -X POST http://localhost:8000/optimization/run \
+  -H "Content-Type: application/json" \
+  -d '{"resume_id":"resume_123","saved_job_id":"job_456","export_formats":["docx","pdf"]}'
+
+curl -X POST http://localhost:8000/exports/resume-version/version_789 \
+  -H "Content-Type: application/json" \
+  -d '{"formats":["markdown","docx","pdf"]}'
+```
+
+Create and update an application:
+
+```bash
+curl -X POST http://localhost:8000/applications \
+  -H "Content-Type: application/json" \
+  -d '{"saved_job_id":"job_456","resume_version_id":"version_789","status":"applied"}'
+
+curl -X PATCH http://localhost:8000/applications/application_123/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"interviewing","note":"Recruiter screen scheduled."}'
+```
+
+Uploads are limited to 10 MB PDF/DOCX files, checked by extension and file
+signature, sanitized, and deleted after extraction. Downloads use opaque
+application-generated IDs and cannot address arbitrary filesystem paths.
+Ordinary saved-job responses omit provider `raw_data`.
+
+Run API integration tests without live LLM or external job calls:
+
+```bash
+pytest tests/test_api.py
 ```
 
 ## Quality Checks
@@ -94,6 +179,10 @@ Resume PDF/DOCX
   -> RenderedResume(...)
   -> DocxResumeRenderer.render_to_file(...) / PdfResumeRenderer.render_to_file(...)
   -> ATS-friendly resume artifact
+  -> ApplicationTrackingService.create_application(...)
+  -> tracked application, notes, status history, and follow-up dates
+  -> jobbot CLI
+  -> developer-operable application tracker
 ```
 
 The parser performs extraction only. It does not optimize, rewrite, score, or
@@ -485,6 +574,133 @@ pytest tests/test_resume_versioning.py
 Production deployment should migrate the SQLAlchemy schema to PostgreSQL and
 add encryption at rest, access controls, secure deletion, authentication, and
 audit logs. Resume contents and PII must never be written to application logs.
+
+### Application Tracking
+
+`ApplicationTrackingService` provides the persistence boundary for a
+lightweight internship-application CRM. A `SavedJob` is a durable snapshot of a
+job the user wants to retain; a `JobApplication` is the separate pipeline
+record created only when the user intends to track an application. Saving a job
+does not mark it as applied.
+
+The application-tracking schema extends the existing SQLite/SQLAlchemy
+persistence layer:
+
+- `saved_jobs`: job snapshots, normalized duplicate keys, optional job analysis,
+  ATS report, fit score, ATS score, and last-seen time
+- `job_applications`: status, optional resume-version linkage, milestone dates,
+  follow-up date, source, and private summary notes
+- `application_notes`: append-only typed notes
+- `application_status_history`: chronological old/new status transitions
+
+Saved-job deduplication reuses `JobNormalizationService`. Matching normalized
+apply URLs, source URLs, provider IDs, or company/title/location fingerprints
+refresh `last_seen_at` rather than silently creating another record.
+`allow_duplicate=True` is available for an explicit user decision.
+
+Application statuses include planned, ready to apply, applied, follow-up
+needed, interview stages, offer, rejected, withdrawn, and closed. Transitions
+are intentionally permissive and always recorded. Entering milestone statuses
+sets the corresponding timestamp only when it is still empty, preserving the
+first known applied, response, rejection, offer, or withdrawal time.
+
+Applications may reference an immutable optimized resume version. The foreign
+key uses nullable `SET NULL` behavior so future resume-version cleanup cannot
+destroy application history. List queries return lightweight
+`JobApplicationSummary` values and support status, company, role, source,
+applied-date range, due follow-up, interview, and resume-version filters.
+Follow-up queries exclude rejected, offered, withdrawn, and closed records.
+
+```python
+saved = tracking.save_job(job, job_analysis, ats_report, fit_score=86.0)
+application = tracking.create_application(saved.id, resume_version.id)
+application = tracking.update_application_status(
+    application.id,
+    ApplicationStatus.APPLIED,
+    "Applied through the company website.",
+)
+tracking.set_follow_up_date(application.id, date(2026, 6, 16))
+due = tracking.list_applications(ApplicationFilters(needs_follow_up=True))
+```
+
+Tracker tests use isolated in-memory SQLite databases:
+
+```bash
+pytest tests/test_application_tracking.py
+```
+
+Application notes and outcome history are sensitive career data. The tracker
+does not send email, schedule calendars, automate applications, store
+credentials, or log private notes and serialized resume/job contents.
+
+### Application Tracker CLI
+
+The `jobbot` Typer CLI makes the application tracker usable before a frontend
+or API exists. It is intentionally thin: commands parse and display data while
+`ApplicationTrackingService` owns validation, relationships, status behavior,
+and repository operations.
+
+Install the project and initialize the configured database by running any
+command:
+
+```bash
+python -m pip install -e .
+jobbot --help
+jobbot jobs list
+```
+
+The CLI resolves its database in this order:
+
+1. global `--db-url`
+2. `JOBBOT_DATABASE_URL`
+3. `AI_INTERNSHIP_ASSISTANT_DATABASE_URL`
+4. development default `sqlite:///data/applications.db`
+
+For example:
+
+```bash
+jobbot --db-url sqlite:///data/dev-tracker.db jobs list
+```
+
+Save and inspect jobs:
+
+```bash
+jobbot jobs save --file examples/jobs/soc_analyst_intern.json
+jobbot jobs list --company "Example Security" --active-only
+jobbot jobs show <saved_job_id>
+jobbot jobs show <saved_job_id> --json
+```
+
+`jobs save` accepts `JobPosting`-compatible JSON and optional
+`--analysis-file` and `--ats-file` structured JSON inputs. The sample under
+`examples/jobs/` shows the minimum practical format. JSON is validated before
+the service is called; this command never scrapes or makes network requests.
+
+Track an application:
+
+```bash
+jobbot applications create --job <saved_job_id> --resume-version <resume_version_id>
+jobbot applications status <application_id> APPLIED --note "Applied through company website."
+jobbot applications followup <application_id> 2026-06-20
+jobbot applications note <application_id> "Recruiter requested availability." --type INTERVIEW
+jobbot applications list --status APPLIED
+jobbot applications due
+jobbot applications show <application_id>
+jobbot applications history <application_id>
+jobbot applications link-resume <application_id> <resume_version_id>
+```
+
+Statuses and note types are case-insensitive at the CLI boundary. Key save,
+list, and show commands support `--json` for automation. Expected input,
+lookup, JSON, and database errors produce concise messages without stack
+traces. The CLI creates no reminders, notifications, emails, calendar events,
+applications, or browser activity.
+
+CLI tests use temporary SQLite files and make no LLM or network calls:
+
+```bash
+pytest tests/test_cli.py
+```
 
 ### Markdown Resume Rendering
 

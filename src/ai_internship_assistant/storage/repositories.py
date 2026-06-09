@@ -224,6 +224,12 @@ class ResumeVersionRepository:
             raise ResumeVersionNotFoundError("resume version was not found")
         return self._to_model(row)
 
+    def exists(self, version_id: str) -> bool:
+        """Return whether a resume version exists without loading sensitive JSON."""
+
+        with self._database.session() as session:
+            return session.get(ResumeVersionRow, version_id) is not None
+
     def list_for_master(self, master_resume_id: str) -> list[StoredResumeVersion]:
         """Return all versions for a master resume ordered newest first."""
 

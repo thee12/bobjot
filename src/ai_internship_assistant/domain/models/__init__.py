@@ -11,9 +11,15 @@ from ai_internship_assistant.domain.models.analysis import (
     SkillRequirement,
 )
 from ai_internship_assistant.domain.models.application import (
-    ApplicationRecord,
+    ApplicationFilters,
+    ApplicationNote,
+    ApplicationNoteType,
     ApplicationStatus,
-    GeneratedResumeVersion,
+    ApplicationStatusHistory,
+    JobApplication,
+    JobApplicationSummary,
+    SavedJob,
+    SavedJobStatus,
 )
 from ai_internship_assistant.domain.models.ats_match import (
     ATSComponentScores,
@@ -142,8 +148,11 @@ from ai_internship_assistant.domain.models.validation import (
 )
 
 __all__ = [
-    "ApplicationRecord",
+    "ApplicationFilters",
+    "ApplicationNote",
+    "ApplicationNoteType",
     "ApplicationStatus",
+    "ApplicationStatusHistory",
     "AnalysisSource",
     "ATSComponentScores",
     "ATSMatchReport",
@@ -169,11 +178,12 @@ __all__ = [
     "ExperienceEmphasisPlan",
     "ExpectedScoreImprovement",
     "FileFormat",
-    "GeneratedResumeVersion",
     "GapSeverity",
     "HeadingStyle",
     "JobDescriptionAnalysis",
     "JobAnalysis",
+    "JobApplication",
+    "JobApplicationSummary",
     "JobDeduplicationGroup",
     "JobDeduplicationResult",
     "JobPosting",
@@ -224,6 +234,8 @@ __all__ = [
     "SafetyViolation",
     "SafetyViolationSeverity",
     "SafetyStatus",
+    "SavedJob",
+    "SavedJobStatus",
     "QueryPriority",
     "RankedJobResult",
     "RankedJobResultSet",
