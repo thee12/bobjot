@@ -224,6 +224,74 @@ class ApplicationStatusHistoryRow(Base):
     note: Mapped[str | None] = mapped_column(Text)
 
 
+class PipelineRunRow(Base):
+    """SQL row for one trackable pipeline execution."""
+
+    __tablename__ = "pipeline_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    resume_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    request_json: Mapped[str] = mapped_column(Text, nullable=False)
+    result_json: Mapped[str | None] = mapped_column(Text)
+    error_summary_json: Mapped[str] = mapped_column(Text, nullable=False)
+    warning_summary_json: Mapped[str] = mapped_column(Text, nullable=False)
+    current_step: Mapped[str | None] = mapped_column(String(64))
+    progress_percentage: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    duration_seconds: Mapped[float | None] = mapped_column(Float)
+    execution_mode: Mapped[str] = mapped_column(String(32), nullable=False)
+    cancellation_requested: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class PipelineRunStepRow(Base):
+    """SQL row for one canonical pipeline step."""
+
+    __tablename__ = "pipeline_run_steps"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    pipeline_run_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("pipeline_runs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    step: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    duration_seconds: Mapped[float | None] = mapped_column(Float)
+    warning_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    metadata_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class PipelineRunEventRow(Base):
+    """SQL row for a privacy-safe pipeline timeline event."""
+
+    __tablename__ = "pipeline_run_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    pipeline_run_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("pipeline_runs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    event_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    step: Mapped[str | None] = mapped_column(String(64))
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    metadata_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+
+
 class Database:
     """Own the SQLAlchemy engine, session factory, and schema initialization."""
 

@@ -10,6 +10,7 @@ from ai_internship_assistant.services import (
     ResumeOutputWriteError,
     ResumeParsingError,
     UnsupportedDocumentFormatError,
+    UnsupportedPipelineExecutionModeError,
     UnsupportedResumeFormatError,
 )
 from ai_internship_assistant.storage import (
@@ -18,6 +19,8 @@ from ai_internship_assistant.storage import (
     DatabaseUnavailableError,
     JobNotFoundError,
     MasterResumeNotFoundError,
+    PipelineRunNotFoundError,
+    PipelineRunStateError,
     ResumeVersionNotFoundError,
     SavedJobNotFoundError,
 )
@@ -26,6 +29,7 @@ _NOT_FOUND = (
     ApplicationNotFoundError,
     JobNotFoundError,
     MasterResumeNotFoundError,
+    PipelineRunNotFoundError,
     ResumeVersionNotFoundError,
     SavedJobNotFoundError,
 )
@@ -33,7 +37,9 @@ _BAD_REQUEST = (
     FullResumeOptimizationError,
     ResumeOptimizationPlanningError,
     UnsupportedDocumentFormatError,
+    UnsupportedPipelineExecutionModeError,
     UnsupportedResumeFormatError,
+    PipelineRunStateError,
 )
 
 

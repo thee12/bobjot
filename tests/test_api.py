@@ -102,6 +102,21 @@ def test_health_and_dependency_health(api: tuple[TestClient, ApiContainer]) -> N
     assert dependencies.json()["database"] == "ok"
 
 
+def test_local_frontend_origin_is_allowed(api: tuple[TestClient, ApiContainer]) -> None:
+    client, _ = api
+
+    response = client.options(
+        "/resumes",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
 def test_upload_rejects_unsupported_file_type(api: tuple[TestClient, ApiContainer]) -> None:
     client, _ = api
 

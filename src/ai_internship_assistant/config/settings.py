@@ -85,3 +85,34 @@ class AppSettings(BaseSettings):
         gt=0.0,
         description="OpenAI bullet-rewrite request timeout.",
     )
+    pipeline_default_execution_mode: str = Field(
+        default="synchronous",
+        description="Default execution strategy used by future pipeline clients.",
+    )
+    pipeline_enable_local_background: bool = Field(
+        default=True,
+        description="Allow FastAPI local background pipeline execution.",
+    )
+    pipeline_progress_polling_enabled: bool = Field(
+        default=True,
+        description="Expose pipeline run polling endpoints.",
+    )
+    pipeline_store_events: bool = Field(
+        default=True,
+        description="Persist privacy-safe pipeline timeline events.",
+    )
+    pipeline_max_stored_events_per_run: int = Field(
+        default=500,
+        ge=0,
+        le=10_000,
+        description="Maximum event records retained for one pipeline run.",
+    )
+    pipeline_run_retention_days: int | None = Field(
+        default=None,
+        ge=1,
+        description="Optional future retention period; cleanup is not implemented yet.",
+    )
+    cors_allowed_origins: str = Field(
+        default="http://localhost:5173,http://127.0.0.1:5173",
+        description="Comma-separated trusted frontend origins for local development.",
+    )

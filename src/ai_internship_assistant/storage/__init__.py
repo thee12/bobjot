@@ -10,6 +10,11 @@ from ai_internship_assistant.storage.database import (
     Database,
     DatabaseUnavailableError,
 )
+from ai_internship_assistant.storage.pipeline_run_repository import (
+    PipelineRunNotFoundError,
+    PipelineRunRepository,
+    PipelineRunStateError,
+)
 from ai_internship_assistant.storage.repositories import (
     CorruptedArtifactError,
     DuplicateMasterResumeError,
@@ -40,6 +45,9 @@ __all__ = [
     "MasterResumeNotFoundError",
     "MasterResumeRepository",
     "PersistenceError",
+    "PipelineRunNotFoundError",
+    "PipelineRunRepository",
+    "PipelineRunStateError",
     "ResumeVersionNotFoundError",
     "ResumeVersionRepository",
     "SavedJobNotFoundError",

@@ -8,6 +8,7 @@ from typing import Annotated, cast
 from fastapi import Depends, Request
 from openai import OpenAI
 
+from ai_internship_assistant.api.pipeline_operations import ApiPipelineOperations
 from ai_internship_assistant.config import AppSettings
 from ai_internship_assistant.domain.models import Resume
 from ai_internship_assistant.services import (
@@ -23,6 +24,8 @@ from ai_internship_assistant.services import (
     MockJobSource,
     OpenAIResumeParser,
     PdfResumeRenderer,
+    PipelineExecutor,
+    PipelineProgressTracker,
     ResumeOptimizationPlanner,
     ResumeParser,
     ResumeVersioningService,
@@ -35,6 +38,7 @@ from ai_internship_assistant.storage import (
     Database,
     JobRepository,
     MasterResumeRepository,
+    PipelineRunRepository,
     ResumeVersionRepository,
     SavedJobRepository,
 )
@@ -73,6 +77,7 @@ class ApiContainer:
     jobs: JobRepository
     saved_jobs: SavedJobRepository
     applications: ApplicationRepository
+    pipeline_runs: PipelineRunRepository
     versioning: ResumeVersioningService
     tracking: ApplicationTrackingService
     profile_pipeline: CandidateProfilePipeline
@@ -90,6 +95,7 @@ class ApiContainer:
     pdf_renderer: PdfResumeRenderer
     export_dir: Path
     exports: dict[str, ExportArtifact] = field(default_factory=dict)
+    pipeline_executor: PipelineExecutor = field(init=False)
 
 
 def build_container(
@@ -112,7 +118,8 @@ def build_container(
     jobs = JobRepository(database)
     saved_jobs = SavedJobRepository(database)
     applications = ApplicationRepository(database)
-    return ApiContainer(
+    pipeline_runs = PipelineRunRepository(database)
+    container = ApiContainer(
         settings=resolved,
         database=database,
         masters=masters,
@@ -120,6 +127,7 @@ def build_container(
         jobs=jobs,
         saved_jobs=saved_jobs,
         applications=applications,
+        pipeline_runs=pipeline_runs,
         versioning=ResumeVersioningService(masters, versions, jobs),
         tracking=ApplicationTrackingService(saved_jobs, applications, versions),
         profile_pipeline=CandidateProfilePipeline(),
@@ -137,6 +145,17 @@ def build_container(
         pdf_renderer=PdfResumeRenderer(),
         export_dir=export_dir,
     )
+    container.pipeline_executor = PipelineExecutor(
+        pipeline_runs,
+        ApiPipelineOperations(container),
+        PipelineProgressTracker(
+            pipeline_runs,
+            store_events=resolved.pipeline_store_events,
+            max_events_per_run=resolved.pipeline_max_stored_events_per_run,
+        ),
+        local_background_enabled=resolved.pipeline_enable_local_background,
+    )
+    return container
 
 
 def _apply_jobbot_aliases(settings: AppSettings) -> AppSettings:

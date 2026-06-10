@@ -75,6 +75,13 @@ from ai_internship_assistant.services.pdf_resume_renderer import (
     PdfRenderingError,
     PdfResumeRenderer,
 )
+from ai_internship_assistant.services.pipeline_service import (
+    PipelineCancelledError,
+    PipelineExecutor,
+    PipelineOperations,
+    PipelineProgressTracker,
+    UnsupportedPipelineExecutionModeError,
+)
 from ai_internship_assistant.services.resume_bullet_rewriter import (
     BulletRewriteSafetyValidator,
     OpenAIResumeBulletRewriter,
@@ -165,6 +172,10 @@ __all__ = [
     "OpenAIResumeParser",
     "PdfRenderingError",
     "PdfResumeRenderer",
+    "PipelineCancelledError",
+    "PipelineExecutor",
+    "PipelineOperations",
+    "PipelineProgressTracker",
     "ProfileGenerator",
     "ResumeParser",
     "ResumeRenderer",
@@ -190,6 +201,7 @@ __all__ = [
     "SkillGapAnalyzer",
     "ResumeValidator",
     "UnsupportedDocumentFormatError",
+    "UnsupportedPipelineExecutionModeError",
     "UnsupportedResumeFormatError",
     "extract_text",
 ]

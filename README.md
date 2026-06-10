@@ -133,6 +133,78 @@ Run API integration tests without live LLM or external job calls:
 pytest tests/test_api.py
 ```
 
+## React Frontend
+
+The typed React frontend under `frontend/` provides resume upload and
+inspection, pipeline submission and polling, saved jobs, optimized resume
+exports, and application tracking.
+
+```bash
+cd frontend
+npm install
+npm run dev
+npm run build
+npm test
+```
+
+It defaults to `http://localhost:8000`; configure another backend with
+`VITE_API_BASE_URL`. React Router owns page boundaries and TanStack Query owns
+ephemeral server state. The browser does not parse resumes, calculate scores,
+or persist API responses in local storage. This remains a trusted local-only
+interface until authentication exists.
+
+### Trackable Pipeline Runs
+
+Long-running workflows can be submitted as durable pipeline runs. A run stores
+its status, current step, bounded progress percentage, compact result,
+summarized warnings/errors, canonical step records, durations, cancellation
+flag, and privacy-safe event timeline.
+
+Synchronous mode executes immediately while recording the same state used by
+background execution:
+
+```bash
+curl -X POST http://localhost:8000/pipeline/runs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resume_id":"resume_123",
+    "execution_mode":"synchronous",
+    "max_jobs_to_search":20,
+    "max_jobs_to_analyze":10,
+    "max_jobs_to_optimize":3,
+    "optimization_enabled":true,
+    "export_enabled":true,
+    "export_formats":["docx","pdf"]
+  }'
+```
+
+`local_background` persists a pending run, returns its ID, and schedules the
+same executor through FastAPI `BackgroundTasks`. Poll and inspect the run:
+
+```bash
+curl http://localhost:8000/pipeline/runs/pipeline_123
+curl http://localhost:8000/pipeline/runs/pipeline_123/steps
+curl http://localhost:8000/pipeline/runs/pipeline_123/events
+curl http://localhost:8000/pipeline/runs/pipeline_123/result
+```
+
+Request cooperative cancellation:
+
+```bash
+curl -X POST http://localhost:8000/pipeline/runs/pipeline_123/cancel
+```
+
+Cancellation is checked between major steps. It does not interrupt an active
+LLM request, provider request, or export operation. Local background tasks run
+inside the API process and are not durable across process restarts. A future
+Celery, RQ, or cloud worker can call the same `PipelineExecutor.run_now(run_id)`
+method without duplicating the workflow.
+
+Pipeline configuration uses typed `AI_INTERNSHIP_ASSISTANT_PIPELINE_*`
+environment variables for local-background enablement, event storage, polling,
+default mode, and event limits. Pipeline results omit raw resume text, prompts,
+provider payloads, API keys, stack traces, and arbitrary filesystem paths.
+
 ## Quality Checks
 
 ```bash

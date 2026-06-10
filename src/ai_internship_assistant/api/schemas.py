@@ -18,6 +18,11 @@ from ai_internship_assistant.domain.models import (
     JobPosting,
     JobSearchPreferences,
     OptimizedResume,
+    PipelineExecutionMode,
+    PipelineRun,
+    PipelineRunResult,
+    PipelineRunStatus,
+    PipelineStep,
     Resume,
     ResumeChange,
     ResumeOptimizationOptions,
@@ -33,6 +38,50 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     service: str = "job-bot-api"
     version: str = "0.1.0"
+
+
+class PipelineRunSummary(BaseModel):
+    id: str
+    resume_id: str
+    status: PipelineRunStatus
+    current_step: PipelineStep | None = None
+    progress_percentage: int
+    warning_count: int
+    error_count: int
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    duration_seconds: float | None = None
+    execution_mode: PipelineExecutionMode
+    cancellation_requested: bool
+
+    @classmethod
+    def from_domain(cls, run: PipelineRun) -> "PipelineRunSummary":
+        return cls(
+            id=run.id,
+            resume_id=run.resume_id,
+            status=run.status,
+            current_step=run.current_step,
+            progress_percentage=run.progress_percentage,
+            warning_count=len(run.warnings),
+            error_count=len(run.errors),
+            started_at=run.started_at,
+            completed_at=run.completed_at,
+            created_at=run.created_at,
+            duration_seconds=run.duration_seconds,
+            execution_mode=run.execution_mode,
+            cancellation_requested=run.cancellation_requested,
+        )
+
+
+class PipelineResultNotReady(BaseModel):
+    pipeline_run_id: str
+    status: PipelineRunStatus
+    ready: bool = False
+    errors: list[str] = Field(default_factory=list)
+
+
+PipelineResultResponse = PipelineRunResult | PipelineResultNotReady
 
 
 class DependencyHealthResponse(BaseModel):

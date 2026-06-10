@@ -37,6 +37,46 @@ The backend currently has no authentication or tenant isolation. It is intended
 for trusted local development only until authentication, authorization, and
 hosted-deployment controls are implemented.
 
+## Trackable Pipeline Run Architecture
+
+Pipeline orchestration is separated from execution strategy.
+`PipelineExecutor` owns submission, synchronous execution, cooperative
+cancellation, and final status selection. It depends on a `PipelineOperations`
+protocol, so the current API-composed workflows and future Celery/RQ workers
+can execute the same core run method.
+
+`PipelineRunRepository` persists run, canonical step, and privacy-safe event
+records in SQLite. `PipelineProgressTracker` owns transitions, equal-weight
+progress calculation, warnings/errors, durations, and cancellation checks
+between major steps. Required failures become `failed`; recoverable per-job
+analysis or optimization failures allow the workflow to finish as
+`partial_success`.
+
+The API supports synchronous execution and FastAPI local background tasks.
+Local background mode is deliberately a development bridge: it is not durable
+across API process restarts and cannot interrupt an active provider, LLM, or
+export call. External queue mode is represented explicitly but rejected until
+a real worker integration is added.
+
+Stored results are compact identifiers and summaries rather than raw resume
+text or provider payloads. Event messages intentionally avoid prompts, API
+keys, private application notes, stack traces, and detailed provider errors.
+
+## Frontend Architecture
+
+The `frontend/` Vite application is a typed React adapter over FastAPI.
+Route-level pages cover the dashboard, resume upload/detail, pipeline
+submission/status, saved jobs, optimized versions, and application tracking.
+Shared layout and common status, error, loading, empty-state, metric, and
+section components keep the operational UI consistent without moving backend
+business logic into the browser.
+
+Typed endpoint modules centralize URLs and response contracts. TanStack Query
+owns ephemeral server state, polling, and mutation invalidation; forms use
+local component state. No resume contents or API responses are written to
+browser storage. Authentication, multi-user isolation, deployment, advanced
+editing, and analytics remain future work.
+
 ## Candidate Profile Architecture
 
 `CandidateProfile` is the normalized representation intended for most future
